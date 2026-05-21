@@ -1,71 +1,122 @@
+# Test Automation ROI Intelligence Platform
 
-# Test Automation Strategic ROI Dashboard 🚀
+This project is a full-stack Test Automation ROI (Return on Investment) dashboard designed to help engineering managers and QA leads balance engineering overhead against pipeline execution gains. It identifies brittle targets and tracks net team hours saved by automating test scenarios.
 
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-![Chart.js](https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)
-![Live Demo](https://img.shields.io/badge/Live_Demo-Online-emerald?style=for-the-badge)
+## ✨ Key Features
 
-A premium, single-file analytics workspace engineered to calculate the true Return on Investment (ROI) of test automation pipelines. Inspired by modern SaaS platforms, it seamlessly cross-references quantitative time data alongside qualitative architectural risks using native browser reactivity.
+*   **Persistent Storage**: Save multiple scenarios and dashboards to your account using Supabase.
+*   **Auth Integration**: Secure login/signup to manage your private ROI data.
+*   **Real-time Calculations**: Instant feedback on Break-even points, Net Savings, and Risk flags.
+*   **Interactive Visuals**: Resource vector charts to visualize manual vs. automation effort.
+*   **Multi-scenario Management**: Add, remove, and categorize test cases with ease.
+*   **Professional PDF Export**: Generate comprehensive PDF reports of your dashboard.
 
-> 🔗 **Production Deployment:** [Launch the Interactive Dashboard Live](https://mynameisedi.github.io/test-automation-roi-calculator/)
+## 🚀 Tech Stack
 
-## Quick summary
-- **Purpose:** Empower engineering leaders and QA teams to make intelligent, data-driven automation choices while dynamically identifying brittle or subjective automation candidates.
-- **Audience:** QA Leads, Automation Architects, and engineering directors looking for a live executive strategy grid to present or deploy internally over GitHub Pages.
+*   **Framework**: Next.js 15 (App Router)
+*   **Database & Auth**: Supabase (PostgreSQL)
+*   **Styling**: Tailwind CSS
+*   **Animations**: Framer Motion
+*   **Icons**: Lucide React
+*   **Charts**: Chart.js with React-Chartjs-2
+*   **PDF Export**: jsPDF + html2canvas
 
-## Repository Structure
-- [index.html](index.html) — The complete dashboard interface. Contains the rich SaaS layout, Google Material Design icon foundations, state engine (Alpine.js), and visualization layer (Chart.js).
-- [README.md](README.md) — Architectural overview and deployment blueprint.
+## 🛠️ Setup Instructions
 
-## Features & Teaching Points
-- **Executive KPI Suite:** Real-time summary analytics tracking aggregate engineering hours saved, automated target recommended quotas, and average break-even horizons.
-- **Qualitative Risk Matrices:** Interactive risk-selection toggle chips replacing standard checkboxes to instantly penalize calculations if target UI layers are unstable or highly subjective.
-- **Visual Resource Breakdown:** Responsive graph analytics canvas processing multi-dataset metrics into a scannable, side-by-side bar chart comparison layout.
-- **Enterprise UI Tokenization:** Leverages sleek glassmorphism panels, high-contrast dark mode states, nested subtle borders, and localized Material Design iconography.
-- **Localized Exporter Node:** Client-side data compilation pipeline allowing teams to instantly download current workspace profiles into standard spreadsheets (`.CSV`).
+Follow these steps to get the project up and running locally.
 
-## Prerequisites
-- A modern internet browser (Chrome, Edge, Safari, Firefox).
-- An active web connection to pull library components directly from verified Edge CDNs.
+### 1. Supabase Project Setup
 
-## Run Locally
-While the dashboard is fully hosted on GitHub Pages, you can also run it completely offline on your desktop.
+1.  **Create a Supabase Project**:
+    *   Go to [Supabase](https://supabase.com/) and create a new project.
+    *   Note down your `Project URL` and `anon public` key from **Project Settings > API**.
 
-Simply clone the repository and execute the layout locally:
+2.  **Database Schema**:
+    *   In your Supabase project dashboard, navigate to the **SQL Editor**.
+    *   Run the following SQL script to create the `scenarios` table and enable Row Level Security (RLS):
 
-```bash
-git clone git@github.com:MyNameIsEdi/test-automation-roi-calculator.git
-cd test-automation-roi-calculator
+    ```sql
+    -- CREATE THE SCENARIOS TABLE
+    CREATE TABLE scenarios (
+      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+      user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+      name TEXT NOT NULL,
+      manual_mins FLOAT DEFAULT 0,
+      frequency FLOAT DEFAULT 0,
+      dev_hours FLOAT DEFAULT 0,
+      maint_hours FLOAT DEFAULT 0,
+      is_flaky BOOLEAN DEFAULT false,
+      is_visual BOOLEAN DEFAULT false,
+      created_at TIMESTAMPTZ DEFAULT now()
+    );
 
-# Execute inside your system environment:
-# On Windows:
-start index.html
+    -- ENABLE ROW LEVEL SECURITY
+    ALTER TABLE scenarios ENABLE ROW LEVEL SECURITY;
 
-# On macOS:
-open index.html
+    -- POLICIES
+    CREATE POLICY "Users can view their own scenarios" 
+    ON scenarios FOR SELECT 
+    USING (auth.uid() = user_id);
 
-# On Linux:
-xdg-open index.html
+    CREATE POLICY "Users can insert their own scenarios" 
+    ON scenarios FOR INSERT 
+    WITH CHECK (auth.uid() = user_id);
 
+    CREATE POLICY "Users can update their own scenarios" 
+    ON scenarios FOR UPDATE 
+    USING (auth.uid() = user_id);
+
+    CREATE POLICY "Users can delete their own scenarios" 
+    ON scenarios FOR DELETE 
+    USING (auth.uid() = user_id);
+    ```
+
+3.  **Authentication Settings**:
+    *   For local development and testing, you might want to disable email confirmation. Go to **Authentication > Providers > Email** and toggle "Confirm email" to OFF.
+
+### 2. Environment Variables
+
+Create a `.env` file in the root of your project and add your Supabase credentials:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_public_key
 ```
 
-## Example output (excerpt)
+Replace `your_supabase_project_url` and `your_supabase_anon_public_key` with the values you obtained from your Supabase project settings.
 
-The decision engine immediately re-evaluates scenario risk metrics upon user interaction. For instance:
+### 3. Installation
 
---- Scenario: Experimental Feature Suite ---
-Manual Baseline Time: 15 mins | Execution Frequency: 8 / month
-Dev Setup Overhead: 12 hours | Maintenance Overhead: 5 hours / month
+Install the project dependencies:
 
-[Interactive Risk Selection Toggle: "Flaky/Shifting UI" Activated]
+```bash
+npm install --legacy-peer-deps
+```
+*Note: `--legacy-peer-deps` is used to bypass potential peer dependency conflicts with React 19 release candidates.*
 
-Resulting Calculations:
+### 4. Run the Development Server
 
-* Net Saved Workspace Capacity: -3.0 hrs
-* Break-Even Horizon: ∞ months
-* Strategic Action Result: Reconsider Risks ⚠️
+```bash
+npm run dev
+```
 
----
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-License: MIT (See repository root for specific term allocations).
+## 💡 Usage
+
+1.  **Sign Up / Log In**: Upon first access, you'll be redirected to the authentication page. Create an account or sign in.
+2.  **Manage Scenarios**:
+    *   Use the table to input details for each test scenario: `Manual Mins`, `Runs/Mo`, `Dev Hrs`, `Maint Hrs`.
+    *   Toggle `Flaky` or `Visual` flags to mark high-risk scenarios.
+    *   Observe real-time calculations for `Break-Even` and `Recommendation`.
+    *   Add new scenarios with the "New Scenario" button.
+    *   Remove scenarios using the trash icon.
+3.  **Monitor KPIs**: The KPI cards at the top provide an overview of `Net Monthly Savings`, `Total Upfront Hours`, `Average Break-Even`, and `Viable Targets`.
+4.  **Visualize Data**: The "Resource Vectors" chart dynamically updates to show the manual effort vs. maintenance tax for each scenario.
+5.  **Save & Export**:
+    *   Click "Save" to persist your current scenarios to your Supabase account.
+    *   Click "Export PDF" to generate a PDF report of your dashboard.
+
+## 🤝 Contributing
+
+Feel free to fork the repository and submit pull requests. For major changes, please open an issue first to discuss what you would like to change.
