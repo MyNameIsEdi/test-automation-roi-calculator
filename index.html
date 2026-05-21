@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Automation ROI Dashboard</title>
+    
+    <!-- CDNs for Tailwind, Alpine, Chart.js, and html2pdf -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -15,217 +20,252 @@
         /* Clean up number input spinners */
         input[type="number"]::-webkit-inner-spin-button, 
         input[type="number"]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
+            -webkit-appearance: none; margin: 0; 
         }
         input[type="number"] { -moz-appearance: textfield; }
         .material-icons-outlined { vertical-align: middle; line-height: 1; }
         
-        /* Smooth transitions */
-        .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
-        .fade-enter-from, .fade-leave-to { opacity: 0; }
+        /* Custom scrollbar for table */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="bg-[#f9f6f1] text-[#2d2e36] min-h-screen antialiased selection:bg-[#2d59b2] selection:text-white">
+<body class="bg-slate-50 text-slate-800 min-h-screen antialiased selection:bg-indigo-500 selection:text-white">
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" x-data="roiCalculator" x-init="initChart()">
-        
-        <!-- Header Section -->
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-[#ede7dc] pb-8 mb-10 gap-6">
-            <div>
-                <div class="flex items-center gap-2 text-[#2d59b2] text-xs font-bold tracking-widest uppercase">
-                    <span class="h-2 w-2 rounded-full bg-[#2d59b2] animate-pulse"></span>
-                    Automation Strategy Matrix
-                </div>
-                <h1 class="text-4xl font-extrabold tracking-tight text-[#2d2e36] mt-2 flex items-center gap-3">
-                    <span class="material-icons-outlined text-3xl text-[#2d59b2] bg-[#2d59b2]/10 p-2.5 rounded-xl">smart_toy</span>
-                    ROI Analysis Tool
-                </h1>
-                <p class="text-[#8a8780] mt-3 text-sm max-w-2xl leading-relaxed">
-                    Balance engineering overhead against pipeline execution gains. Input parameters below to automatically flag brittle targets and track net team hours saved.
-                </p>
-            </div>
-            <div class="flex items-center gap-3 self-start lg:self-center">
-                <button @click="exportToCSV()" class="bg-white hover:bg-[#f1eee8] text-[#2d2e36] border border-[#ede7dc] px-5 py-3 rounded-xl text-xs font-bold tracking-wide transition-all duration-200 flex items-center gap-2 shadow-sm focus:outline-none focus:ring-4 focus:ring-[#2d59b2]/20 group" aria-label="Export report to CSV">
-                    <span class="material-icons-outlined text-[#8a8780] group-hover:text-[#2d2e36] transition-colors text-lg">file_download</span>
-                    EXPORT REPORT (.CSV)
-                </button>
-            </div>
-        </div>
+    <!-- Decorative Top Gradient -->
+    <div class="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" data-html2canvas-ignore="true"></div>
 
-        <!-- KPI Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <!-- Net Savings Card -->
-            <div class="bg-white border border-[#ede7dc] rounded-2xl p-6 shadow-sm relative overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1 group">
-                <div class="flex justify-between items-start">
-                    <p class="text-xs font-bold tracking-wider text-[#8a8780] uppercase">Net Monthly Savings</p>
-                    <span class="material-icons-outlined text-[#2d59b2] bg-[#2d59b2]/10 p-1.5 rounded-lg text-lg">trending_up</span>
-                </div>
-                <div class="flex items-baseline gap-2 mt-4">
-                    <span class="text-4xl font-extrabold text-[#2d59b2] tracking-tight transition-all duration-300 inline-block origin-left" x-text="totalSavings"></span>
-                    <span class="text-xs text-[#8a8780] font-medium uppercase tracking-wide">hours / mo</span>
-                </div>
-            </div>
+    <!-- MAIN WRAPPER (This is what gets captured for the PDF) -->
+    <div id="dashboard-report" class="bg-slate-50">
+        <div class="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-10" x-data="roiCalculator" x-init="initChart()">
             
-            <!-- Average Break-Even Card -->
-            <div class="bg-white border border-[#ede7dc] rounded-2xl p-6 shadow-sm relative overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1 group">
-                <div class="flex justify-between items-start">
-                    <p class="text-xs font-bold tracking-wider text-[#8a8780] uppercase">Average Break-Even</p>
-                    <span class="material-icons-outlined text-amber-700 bg-amber-500/10 p-1.5 rounded-lg text-lg">date_range</span>
+            <!-- Header Section -->
+            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between pb-8 mb-8 gap-6">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-[10px] font-bold tracking-widest uppercase mb-4">
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
+                        </span>
+                        Strategy Matrix
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3">
+                        Automation ROI Dashboard
+                    </h1>
+                    <p class="text-slate-500 mt-3 text-sm max-w-2xl leading-relaxed">
+                        Balance engineering overhead against pipeline execution gains. Identifies brittle targets and tracks net team hours saved. 
+                        <strong class="text-slate-700" data-html2canvas-ignore="true">Data auto-saves securely in your browser.</strong>
+                    </p>
                 </div>
-                <div class="flex items-baseline gap-2 mt-4">
-                    <span class="text-4xl font-extrabold text-amber-700 tracking-tight transition-all duration-300 inline-block origin-left" x-text="avgROI"></span>
-                    <span class="text-xs text-[#8a8780] font-medium uppercase tracking-wide">months</span>
+                
+                <!-- Action Buttons (Hidden in PDF via data-html2canvas-ignore) -->
+                <div class="flex items-center gap-3 w-full lg:w-auto" data-html2canvas-ignore="true">
+                    <button @click="resetData()" class="flex-1 lg:flex-none bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 flex items-center justify-center gap-2 shadow-sm" title="Reset all data to default">
+                        <span class="material-icons-outlined text-lg">restart_alt</span>
+                        Reset
+                    </button>
+                    <button id="exportPdfBtn" @click="exportToPDF()" class="flex-1 lg:flex-none bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-200 flex items-center justify-center gap-2 shadow-md shadow-indigo-200 hover:shadow-indigo-300">
+                        <span class="material-icons-outlined text-lg" id="pdfIcon">picture_as_pdf</span>
+                        <span id="pdfText">Export PDF</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- Recommendations Card -->
-            <div class="bg-white border border-[#ede7dc] rounded-2xl p-6 shadow-sm relative overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1 group">
-                <div class="flex justify-between items-start">
-                    <p class="text-xs font-bold tracking-wider text-[#8a8780] uppercase">Target Recommendations</p>
-                    <span class="material-icons-outlined text-[#2d59b2] bg-[#a8bfe6]/30 p-1.5 rounded-lg text-lg">assignment_turned_in</span>
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+                <!-- Net Savings Card -->
+                <div class="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-5">
+                        <span class="material-icons-outlined text-6xl text-indigo-600">trending_up</span>
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-[11px] font-bold tracking-wider text-slate-500 uppercase mb-1">Net Monthly Savings</p>
+                        <div class="flex items-end gap-1.5 mt-2">
+                            <span class="text-3xl font-extrabold text-indigo-600 tracking-tight" x-text="totalSavings"></span>
+                            <span class="text-xs text-slate-500 font-medium mb-1">hrs / mo</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-baseline gap-2 mt-4">
-                    <span class="text-4xl font-extrabold text-slate-800 tracking-tight transition-all duration-300 inline-block origin-left" x-text="recommendedCount"></span>
-                    <span class="text-xs text-[#8a8780] font-medium" x-text="'of ' + tests.length + ' mapped'"></span>
-                </div>
-            </div>
-        </div>
 
-        <!-- Main Content Area -->
-        <div class="grid grid-cols-1 gap-8 items-start">
-            
-            <!-- Data Table Section -->
-            <div class="bg-white border border-[#ede7dc] rounded-2xl shadow-sm overflow-hidden flex flex-col">
-                <div class="px-6 py-5 border-b border-[#ede7dc] bg-[#f1eee8]/40 flex justify-between items-center">
-                    <div class="flex items-center gap-2">
-                        <span class="material-icons-outlined text-[#8a8780] text-lg">list_alt</span>
-                        <h2 class="text-xs font-bold uppercase tracking-wider text-[#2d2e36]">Target Selection Parameters</h2>
+                <!-- Upfront Investment Card -->
+                <div class="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-5">
+                        <span class="material-icons-outlined text-6xl text-purple-600">code</span>
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-[11px] font-bold tracking-wider text-slate-500 uppercase mb-1">Total Upfront Investment</p>
+                        <div class="flex items-end gap-1.5 mt-2">
+                            <span class="text-3xl font-extrabold text-slate-800 tracking-tight" x-text="totalInvestment"></span>
+                            <span class="text-xs text-slate-500 font-medium mb-1">dev hrs</span>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="overflow-x-auto w-full">
-                    <table class="w-full min-w-full text-sm text-left whitespace-nowrap">
-                        <thead class="bg-[#f1eee8]/60 text-[#8a8780] text-[10px] font-bold uppercase tracking-widest border-b border-[#ede7dc]">
-                            <tr>
-                                <th class="px-6 py-4 text-[#2d2e36]">Test Scenario Description</th>
-                                <th class="px-3 py-4 text-center">Manual Mins <span class="text-[#8a8780] block lowercase font-normal text-[10px] mt-0.5">(per run)</span></th>
-                                <th class="px-3 py-4 text-center">Runs / Mo</th>
-                                <th class="px-3 py-4 text-center">Dev Hours <span class="text-[#8a8780] block lowercase font-normal text-[10px] mt-0.5">(initial setup)</span></th>
-                                <th class="px-3 py-4 text-center">Maint Hours <span class="text-[#8a8780] block lowercase font-normal text-[10px] mt-0.5">(per month)</span></th>
-                                <th class="px-6 py-4 border-l border-[#ede7dc] bg-[#f1eee8]/20 text-center">Qualitative Architecture Risks</th>
-                                <th class="px-4 py-4 bg-[#f1eee8]/30 text-[#2d59b2] text-center font-bold">Net Saved <span class="text-[#8a8780] block lowercase font-normal text-[10px] mt-0.5">(hours / mo)</span></th>
-                                <th class="px-4 py-4 bg-[#f1eee8]/30 text-[#2d59b2] text-center font-bold">Break-Even <span class="text-[#8a8780] block lowercase font-normal text-[10px] mt-0.5">(months)</span></th>
-                                <th class="px-6 py-4 bg-[#f1eee8]/10 text-center">Strategic Action</th>
-                                <th class="px-4 py-4"></th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-[#ede7dc]/60">
-                            <!-- Empty State -->
-                            <tr x-show="tests.length === 0" x-cloak>
-                                <td colspan="10" class="px-6 py-12 text-center text-[#8a8780]">
-                                    <span class="material-icons-outlined text-4xl mb-3 opacity-50">inbox</span>
-                                    <p class="text-sm font-medium">No test scenarios mapped.</p>
-                                    <p class="text-xs mt-1">Click "Add Assessment Entry" below to begin.</p>
-                                </td>
-                            </tr>
-                            
-                            <template x-for="(test, index) in tests" :key="index">
-                                <tr class="hover:bg-[#f1eee8]/30 transition-colors duration-150 group">
-                                    <td class="px-6 py-3.5">
-                                        <input type="text" x-model="test.name" @input="updateChart()" placeholder="e.g., Auth Flow Validation" aria-label="Test Scenario Name" class="w-full bg-white border border-[#ede7dc] rounded-xl px-4 py-2 text-xs text-[#2d2e36] placeholder-slate-400 focus:outline-none focus:border-[#2d59b2] focus:ring-2 focus:ring-[#2d59b2]/20 transition-all duration-200 font-medium min-w-[260px] shadow-sm">
-                                    </td>
-                                    <td class="px-2 py-3.5 w-24">
-                                        <input type="number" min="0" x-model.number="test.manualMins" @input="updateChart()" aria-label="Manual Minutes Per Run" class="w-full bg-white border border-[#ede7dc] rounded-xl p-2 text-center text-xs font-semibold text-[#2d2e36] focus:outline-none focus:border-[#2d59b2] focus:ring-2 focus:ring-[#2d59b2]/20 transition-all duration-200 shadow-sm">
-                                    </td>
-                                    <td class="px-2 py-3.5 w-24">
-                                        <input type="number" min="0" x-model.number="test.freq" @input="updateChart()" aria-label="Runs Per Month" class="w-full bg-white border border-[#ede7dc] rounded-xl p-2 text-center text-xs font-semibold text-[#2d2e36] focus:outline-none focus:border-[#2d59b2] focus:ring-2 focus:ring-[#2d59b2]/20 transition-all duration-200 shadow-sm">
-                                    </td>
-                                    <td class="px-2 py-3.5 w-24">
-                                        <input type="number" min="0" step="0.5" x-model.number="test.devHours" @input="updateChart()" aria-label="Development Hours" class="w-full bg-white border border-[#ede7dc] rounded-xl p-2 text-center text-xs font-semibold text-[#2d2e36] focus:outline-none focus:border-[#2d59b2] focus:ring-2 focus:ring-[#2d59b2]/20 transition-all duration-200 shadow-sm">
-                                    </td>
-                                    <td class="px-2 py-3.5 w-24">
-                                        <input type="number" min="0" step="0.1" x-model.number="test.maintHours" @input="updateChart()" aria-label="Maintenance Hours Per Month" class="w-full bg-white border border-[#ede7dc] rounded-xl p-2 text-center text-xs font-semibold text-[#2d2e36] focus:outline-none focus:border-[#2d59b2] focus:ring-2 focus:ring-[#2d59b2]/20 transition-all duration-200 shadow-sm">
-                                    </td>
-                                    <td class="px-6 py-3.5 border-l border-[#ede7dc] bg-[#f1eee8]/10 min-w-[300px]">
-                                        <div class="flex gap-2 text-[11px] font-medium select-none justify-center">
-                                            <button @click="test.isUnstableUi = !test.isUnstableUi; updateChart()" 
-                                                    :class="test.isUnstableUi ? 'bg-[#e1c49f]/20 border-[#e1c49f] text-amber-900 font-bold' : 'bg-white border-[#ede7dc] text-[#8a8780] hover:text-[#2d2e36] hover:border-slate-400'"
-                                                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
-                                                    aria-pressed="test.isUnstableUi">
-                                                <span class="material-icons-outlined text-xs">report_problem</span> Flaky UI
-                                            </button>
-                                            <button @click="test.isSubjective = !test.isSubjective; updateChart()" 
-                                                    :class="test.isSubjective ? 'bg-[#e1c49f]/20 border-[#e1c49f] text-amber-900 font-bold' : 'bg-white border-[#ede7dc] text-[#8a8780] hover:text-[#2d2e36] hover:border-slate-400'"
-                                                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
-                                                    aria-pressed="test.isSubjective">
-                                                <span class="material-icons-outlined text-xs">psychology</span> Subjective UX
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3.5 text-center font-bold text-xs text-[#2d2e36] bg-[#f1eee8]/10" x-text="calcNetSavings(test) + ' hrs'"></td>
-                                    <td class="px-4 py-3.5 text-center font-bold text-xs bg-[#f1eee8]/10" :class="getROIClass(test)" x-text="calcROI(test) === '∞' ? '∞' : calcROI(test) + ' mo'"></td>
-                                    <td class="px-6 py-3.5 text-center">
-                                        <span class="px-3 py-1.5 rounded-xl text-[10px] font-bold tracking-wide uppercase inline-flex items-center gap-1.5 border" :class="getRecommendation(test).class">
-                                            <span class="material-icons-outlined text-[14px]" x-text="getRecommendation(test).icon"></span>
-                                            <span x-text="getRecommendation(test).text"></span>
-                                        </span>
-                                    </td>
-                                    <td class="px-4 py-3.5 text-center w-12">
-                                        <button @click="removeRow(index)" class="text-[#8a8780] hover:text-rose-600 p-2 rounded-lg hover:bg-rose-50 transition-all duration-150 opacity-0 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20" aria-label="Delete Row" title="Delete Row">
-                                            <span class="material-icons-outlined text-lg">delete_outline</span>
-                                        </button>
+                <!-- Average Break-Even Card -->
+                <div class="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-5">
+                        <span class="material-icons-outlined text-6xl text-amber-600">event_available</span>
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-[11px] font-bold tracking-wider text-slate-500 uppercase mb-1">Average Break-Even</p>
+                        <div class="flex items-end gap-1.5 mt-2">
+                            <span class="text-3xl font-extrabold text-amber-600 tracking-tight" x-text="avgROI"></span>
+                            <span class="text-xs text-slate-500 font-medium mb-1">months</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommendations Card -->
+                <div class="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-5">
+                        <span class="material-icons-outlined text-6xl text-emerald-600">rocket_launch</span>
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-[11px] font-bold tracking-wider text-slate-500 uppercase mb-1">Viable Targets</p>
+                        <div class="flex items-end gap-1.5 mt-2">
+                            <span class="text-3xl font-extrabold text-emerald-600 tracking-tight" x-text="recommendedCount"></span>
+                            <span class="text-xs text-slate-500 font-medium mb-1" x-text="'of ' + tests.length + ' mapped'"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
+                
+                <!-- Data Table Section -->
+                <div class="xl:col-span-2 bg-white border border-slate-200/80 rounded-2xl shadow-sm flex flex-col relative">
+                    
+                    <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-2xl">
+                        <div class="flex items-center gap-2">
+                            <div class="bg-indigo-100 p-1.5 rounded-lg text-indigo-600">
+                                <span class="material-icons-outlined text-sm">tune</span>
+                            </div>
+                            <h2 class="text-sm font-bold text-slate-800">Assessment Parameters</h2>
+                        </div>
+                        <button @click="addRow()" data-html2canvas-ignore="true" class="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide transition-all flex items-center gap-1">
+                            <span class="material-icons-outlined text-sm">add</span> New Scenario
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full min-w-full text-sm text-left">
+                            <thead class="bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-widest border-b border-slate-200">
+                                <tr>
+                                    <th class="px-6 py-4">Test Scenario Description</th>
+                                    <th class="px-3 py-4 text-center">Manual Mins</th>
+                                    <th class="px-3 py-4 text-center">Runs/Mo</th>
+                                    <th class="px-3 py-4 text-center">Dev Hrs</th>
+                                    <th class="px-3 py-4 text-center">Maint Hrs</th>
+                                    <th class="px-5 py-4 border-l border-slate-200 text-center">Risk Flags</th>
+                                    <th class="px-4 py-4 bg-indigo-50/50 text-indigo-700 text-center border-l border-slate-200">Net Saved</th>
+                                    <th class="px-4 py-4 bg-indigo-50/50 text-indigo-700 text-center">Break-Even</th>
+                                    <th class="px-4 py-4 bg-indigo-50/50 text-indigo-700 text-center">Action</th>
+                                    <th class="px-4 py-4" data-html2canvas-ignore="true"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr x-show="tests.length === 0" x-cloak data-html2canvas-ignore="true">
+                                    <td colspan="10" class="px-6 py-16 text-center text-slate-400 bg-slate-50/30">
+                                        <span class="material-icons-outlined text-5xl mb-3 opacity-30">inventory_2</span>
+                                        <p class="text-sm font-medium text-slate-600">No test scenarios mapped.</p>
                                     </td>
                                 </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="p-5 bg-[#f1eee8]/30 border-t border-[#ede7dc] flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto">
-                    <button @click="addRow()" class="w-full sm:w-auto bg-[#2d59b2] hover:bg-[#1e408a] text-white px-5 py-3 rounded-xl text-xs font-bold tracking-wider uppercase transition-all duration-150 shadow-sm flex items-center justify-center gap-2 focus:outline-none focus:ring-4 focus:ring-[#2d59b2]/30">
-                        <span class="material-icons-outlined text-lg">add</span>
-                        Add Assessment Entry
-                    </button>
-                    <div class="text-[11px] text-[#8a8780] flex items-center gap-1.5 max-w-md sm:text-right">
-                        <span class="material-icons-outlined text-sm text-[#2d59b2] shrink-0">info</span>
-                        Framework automatically penalizes savings values against monthly structural maintenance targets.
+                                
+                                <template x-for="(test, index) in tests" :key="index">
+                                    <tr class="hover:bg-slate-50/80 transition-colors duration-150 group" x-transition.duration.300ms>
+                                        <td class="px-4 py-2">
+                                            <input type="text" x-model="test.name" @input="updateChart()" placeholder="Scenario Name" class="w-full bg-transparent border border-transparent hover:border-slate-300 hover:bg-white rounded-lg px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all font-medium min-w-[180px]">
+                                        </td>
+                                        <td class="px-2 py-2 w-16">
+                                            <input type="number" min="0" x-model.number="test.manualMins" @input="updateChart()" class="w-full bg-transparent border border-transparent hover:border-slate-300 hover:bg-white rounded-lg px-2 py-2 text-center text-xs font-semibold text-slate-700 focus:outline-none focus:border-indigo-500 transition-all">
+                                        </td>
+                                        <td class="px-2 py-2 w-16">
+                                            <input type="number" min="0" x-model.number="test.freq" @input="updateChart()" class="w-full bg-transparent border border-transparent hover:border-slate-300 hover:bg-white rounded-lg px-2 py-2 text-center text-xs font-semibold text-slate-700 focus:outline-none focus:border-indigo-500 transition-all">
+                                        </td>
+                                        <td class="px-2 py-2 w-16">
+                                            <input type="number" min="0" step="0.5" x-model.number="test.devHours" @input="updateChart()" class="w-full bg-transparent border border-transparent hover:border-slate-300 hover:bg-white rounded-lg px-2 py-2 text-center text-xs font-semibold text-slate-700 focus:outline-none focus:border-indigo-500 transition-all">
+                                        </td>
+                                        <td class="px-2 py-2 w-16">
+                                            <input type="number" min="0" step="0.1" x-model.number="test.maintHours" @input="updateChart()" class="w-full bg-transparent border border-transparent hover:border-slate-300 hover:bg-white rounded-lg px-2 py-2 text-center text-xs font-semibold text-slate-700 focus:outline-none focus:border-indigo-500 transition-all">
+                                        </td>
+                                        <td class="px-4 py-2 border-l border-slate-100 min-w-[160px]">
+                                            <div class="flex gap-1.5 justify-center">
+                                                <button @click="test.isUnstableUi = !test.isUnstableUi; updateChart()" 
+                                                        :class="test.isUnstableUi ? 'bg-rose-50 border-rose-200 text-rose-700 font-bold' : 'bg-white border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300'"
+                                                        class="flex items-center gap-1 px-2 py-1 rounded-md border transition-all text-[10px] focus:outline-none">
+                                                    <span class="material-icons-outlined text-[12px]">bug_report</span> Flaky
+                                                </button>
+                                                <button @click="test.isSubjective = !test.isSubjective; updateChart()" 
+                                                        :class="test.isSubjective ? 'bg-amber-50 border-amber-200 text-amber-700 font-bold' : 'bg-white border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300'"
+                                                        class="flex items-center gap-1 px-2 py-1 rounded-md border transition-all text-[10px] focus:outline-none">
+                                                    <span class="material-icons-outlined text-[12px]">visibility</span> Visual
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-center font-bold text-xs text-slate-800 bg-indigo-50/20 border-l border-slate-100" x-text="calcNetSavings(test) + 'h'"></td>
+                                        <td class="px-4 py-3.5 text-center font-bold text-xs bg-indigo-50/20" :class="getROIClass(test)" x-text="calcROI(test) === '∞' ? '∞' : calcROI(test) + 'm'"></td>
+                                        <td class="px-4 py-3.5 text-center bg-indigo-50/20">
+                                            <span class="px-2.5 py-1 rounded-md text-[9px] font-bold tracking-wider uppercase inline-flex items-center gap-1 border" :class="getRecommendation(test).class">
+                                                <span x-text="getRecommendation(test).text"></span>
+                                            </span>
+                                        </td>
+                                        <!-- Hide delete button in PDF -->
+                                        <td class="px-3 py-3.5 text-center w-10" data-html2canvas-ignore="true">
+                                            <button @click="removeRow(index)" class="text-slate-300 hover:text-rose-600 p-1.5 rounded hover:bg-rose-50 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100" title="Delete Row">
+                                                <span class="material-icons-outlined text-[18px]">close</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-100 rounded-b-2xl mt-auto">
+                        <div class="text-[10px] text-slate-500 flex items-center gap-1.5">
+                            <span class="material-icons-outlined text-[14px] text-indigo-400">auto_awesome</span>
+                            Calculations automatically factor in the monthly maintenance tax required to keep automated scripts alive.
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Chart Section -->
-            <div class="bg-white border border-[#ede7dc] rounded-2xl shadow-sm p-6">
-                <div class="flex items-center gap-2 mb-6">
-                    <span class="material-icons-outlined text-[#8a8780] text-lg">bar_chart</span>
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-[#2d2e36]">
-                        Resource Consumption Vectors
-                    </h3>
+                <!-- Chart Section -->
+                <div class="xl:col-span-1 bg-white border border-slate-200/80 rounded-2xl shadow-sm p-6 flex flex-col">
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="bg-purple-100 p-1.5 rounded-lg text-purple-600">
+                            <span class="material-icons-outlined text-sm">insights</span>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-800">
+                            Resource Vectors
+                        </h3>
+                    </div>
+                    <div class="h-72 w-full relative grow">
+                        <canvas id="roiChart"></canvas>
+                    </div>
                 </div>
-                <div class="h-64 w-full relative">
-                    <canvas id="roiChart" aria-label="Resource Consumption Bar Chart" role="img"></canvas>
-                </div>
-            </div>
 
+            </div>
         </div>
-    </div>
+    </div> <!-- END WRAPPER -->
 
     <script>
+        const defaultTests = [
+            { name: "Core Regression Suite", manualMins: 10, freq: 90, devHours: 2, maintHours: 0.5, isUnstableUi: false, isSubjective: false },
+            { name: "Smoke Test (PR Merges)", manualMins: 5, freq: 60, devHours: 4, maintHours: 0.2, isUnstableUi: false, isSubjective: false },
+            { name: "Cross-Browser Matrix", manualMins: 20, freq: 30, devHours: 6, maintHours: 1, isUnstableUi: false, isSubjective: false },
+            { name: "Experimental Features", manualMins: 15, freq: 8, devHours: 12, maintHours: 5, isUnstableUi: true, isSubjective: false },
+            { name: "Exploratory UX Session", manualMins: 45, freq: 1, devHours: 20, maintHours: 2, isUnstableUi: false, isSubjective: true },
+            { name: "Data API Validations", manualMins: 30, freq: 25, devHours: 5, maintHours: 0.5, isUnstableUi: false, isSubjective: false }
+        ];
+
         document.addEventListener('alpine:init', () => {
             Alpine.data('roiCalculator', () => ({
-                tests: [
-                    { name: "Core Regression Suite (Runs on every build)", manualMins: 10, freq: 90, devHours: 2, maintHours: 0.5, isUnstableUi: false, isSubjective: false },
-                    { name: "Smoke Test Suite (Triggered on PR merge)", manualMins: 5, freq: 60, devHours: 4, maintHours: 0.2, isUnstableUi: false, isSubjective: false },
-                    { name: "Multi-browser Validation Grid (Playwright)", manualMins: 20, freq: 30, devHours: 6, maintHours: 1, isUnstableUi: false, isSubjective: false },
-                    { name: "Experimental Feature Suite (Unstable UI)", manualMins: 15, freq: 8, devHours: 12, maintHours: 5, isUnstableUi: true, isSubjective: false },
-                    { name: "Ad-hoc Exploratory & UX Session", manualMins: 45, freq: 1, devHours: 20, maintHours: 2, isUnstableUi: false, isSubjective: true },
-                    { name: "Data-Driven Validation Array", manualMins: 30, freq: 25, devHours: 5, maintHours: 0.5, isUnstableUi: false, isSubjective: false }
-                ],
+                tests: Alpine.$persist(JSON.parse(JSON.stringify(defaultTests))).as('roi-data'),
                 chartInstance: null,
 
-                calcManualMonthly(test) {
-                    return ((test.manualMins * test.freq) / 60) || 0;
-                },
+                calcManualMonthly(test) { return ((test.manualMins * test.freq) / 60) || 0; },
                 
                 calcNetSavings(test) {
                     const savings = this.calcManualMonthly(test) - (test.maintHours || 0);
@@ -240,40 +280,37 @@
                 
                 getROIClass(test) {
                     const roiStr = this.calcROI(test);
-                    if (roiStr === '∞') return 'text-rose-600';
+                    if (roiStr === '∞') return 'text-rose-500';
                     const roi = parseFloat(roiStr);
-                    if (roi > 6) return 'text-rose-600';
-                    if (roi <= 3) return 'text-emerald-600';
-                    return 'text-amber-600';
+                    if (roi > 6) return 'text-rose-500';
+                    if (roi <= 3) return 'text-emerald-500';
+                    return 'text-amber-500';
                 },
                 
                 getRecommendation(test) {
-                    if (test.isUnstableUi || test.isSubjective) {
-                        return { text: 'Reconsider Risks', icon: 'warning', class: 'bg-[#e1c49f]/10 text-amber-800 border-[#e1c49f]/40' };
-                    }
-                    
+                    if (test.isUnstableUi || test.isSubjective) return { text: 'High Risk', class: 'bg-rose-50 text-rose-700 border-rose-200' };
                     const savings = parseFloat(this.calcNetSavings(test));
-                    if (savings <= 0) return { text: 'Keep Manual', icon: 'cancel', class: 'bg-rose-50 text-rose-700 border-rose-200' };
-                    
+                    if (savings <= 0) return { text: 'Keep Manual', class: 'bg-slate-100 text-slate-600 border-slate-200' };
                     const roi = (test.devHours || 0) / savings;
-                    if (roi <= 3) return { text: 'Automate ASAP', icon: 'bolt', class: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
-                    if (roi <= 6) return { text: 'Viable Option', icon: 'help_outline', class: 'bg-blue-50 text-blue-700 border-blue-200' };
-                    
-                    return { text: 'Low Priority', icon: 'hourglass_empty', class: 'bg-slate-100 text-slate-600 border-slate-200' };
+                    if (roi <= 3) return { text: 'Automate', class: 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm' };
+                    if (roi <= 6) return { text: 'Viable', class: 'bg-indigo-50 text-indigo-700 border-indigo-200' };
+                    return { text: 'Low Priority', class: 'bg-slate-100 text-slate-600 border-slate-200' };
                 },
                 
                 get totalSavings() {
-                    return this.tests.reduce((sum, test) => {
-                        const savings = parseFloat(this.calcNetSavings(test));
+                    return this.tests.reduce((sum, t) => {
+                        const savings = parseFloat(this.calcNetSavings(t));
                         return sum + (savings > 0 ? savings : 0);
                     }, 0).toFixed(1);
                 },
+
+                get totalInvestment() { return this.tests.reduce((sum, t) => sum + (parseFloat(t.devHours) || 0), 0).toFixed(1); },
                 
                 get avgROI() {
                     let validCount = 0;
-                    const totalRoi = this.tests.reduce((sum, test) => {
-                        const roi = parseFloat(this.calcROI(test));
-                        if (!isNaN(roi) && this.calcROI(test) !== '∞' && !test.isUnstableUi && !test.isSubjective) {
+                    const totalRoi = this.tests.reduce((sum, t) => {
+                        const roi = parseFloat(this.calcROI(t));
+                        if (!isNaN(roi) && this.calcROI(t) !== '∞' && !t.isUnstableUi && !t.isSubjective) {
                             validCount++;
                             return sum + roi;
                         }
@@ -283,10 +320,7 @@
                 },
                 
                 get recommendedCount() {
-                    return this.tests.filter(test => {
-                        const rec = this.getRecommendation(test).text;
-                        return rec === 'Automate ASAP' || rec === 'Viable Option';
-                    }).length;
+                    return this.tests.filter(t => ['Automate', 'Viable'].includes(this.getRecommendation(t).text)).length;
                 },
 
                 addRow() {
@@ -299,9 +333,19 @@
                     this.updateChart();
                 },
 
+                resetData() {
+                    if(confirm("Reset all data to default values?")) {
+                        this.tests = JSON.parse(JSON.stringify(defaultTests));
+                        this.updateChart();
+                    }
+                },
+
                 initChart() {
                     this.$nextTick(() => {
                         const ctx = document.getElementById('roiChart').getContext('2d');
+                        Chart.defaults.font.family = "'Inter', sans-serif";
+                        Chart.defaults.color = '#64748b';
+
                         this.chartInstance = new Chart(ctx, {
                             type: 'bar',
                             data: this.getChartData(),
@@ -309,15 +353,14 @@
                                 responsive: true,
                                 maintainAspectRatio: false,
                                 plugins: {
-                                    legend: { labels: { color: '#8a8780', font: { family: 'Inter', size: 11, weight: 500 } } }
+                                    legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 20 } },
+                                    tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { size: 13, weight: 'bold' }, padding: 12, cornerRadius: 8 }
                                 },
                                 scales: {
-                                    x: { grid: { color: '#ede7dc' }, ticks: { color: '#8a8780', font: { family: 'Inter', size: 10 } } },
-                                    y: { grid: { color: '#ede7dc' }, ticks: { color: '#8a8780', font: { size: 10 } } }
+                                    x: { grid: { display: false }, ticks: { maxRotation: 45, minRotation: 45, callback: function(val) { let label = this.getLabelForValue(val); return label.length > 12 ? label.substr(0, 12) + '...' : label; } } },
+                                    y: { grid: { color: '#f1f5f9', drawBorder: false }, beginAtZero: true }
                                 },
-                                animation: {
-                                    duration: 400
-                                }
+                                animation: { duration: 0 } // Disabled animation for flawless PDF render
                             }
                         });
                     });
@@ -325,24 +368,10 @@
                 
                 getChartData() {
                     return {
-                        labels: this.tests.map(t => t.name || 'Unnamed Scenario'),
+                        labels: this.tests.map(t => t.name || 'Unnamed'),
                         datasets: [
-                            {
-                                label: 'Manual Baseline (Hrs/Mo)',
-                                data: this.tests.map(t => this.calcManualMonthly(t).toFixed(1)),
-                                backgroundColor: 'rgba(45, 89, 178, 0.7)',
-                                borderColor: 'rgb(45, 89, 178)',
-                                borderWidth: 1.5,
-                                borderRadius: 4
-                            },
-                            {
-                                label: 'Maintenance Overhead (Hrs/Mo)',
-                                data: this.tests.map(t => t.maintHours || 0),
-                                backgroundColor: 'rgba(225, 196, 159, 0.7)',
-                                borderColor: 'rgb(225, 196, 159)',
-                                borderWidth: 1.5,
-                                borderRadius: 4
-                            }
+                            { label: 'Manual Base (Hrs)', data: this.tests.map(t => this.calcManualMonthly(t).toFixed(1)), backgroundColor: '#6366f1', borderRadius: { topLeft: 4, topRight: 4 }, barPercentage: 0.6 },
+                            { label: 'Maint Tax (Hrs)', data: this.tests.map(t => t.maintHours || 0), backgroundColor: '#cbd5e1', borderRadius: { topLeft: 4, topRight: 4 }, barPercentage: 0.6 }
                         ]
                     };
                 },
@@ -354,33 +383,37 @@
                     }
                 },
 
-                exportToCSV() {
-                    let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-                    csvContent += "Test Name,Manual Time (Mins),Frequency/Mo,Manual Time/Mo (Hrs),Automation Dev (Hrs),Automation Maint/Mo (Hrs),Net Monthly Savings (Hrs),Break-even (Months),Strategic Recommendation\n";
+                exportToPDF() {
+                    // UI loading state
+                    const iconEl = document.getElementById('pdfIcon');
+                    const textEl = document.getElementById('pdfText');
+                    iconEl.innerHTML = 'autorenew';
+                    iconEl.classList.add('animate-spin');
+                    textEl.innerText = 'Generating...';
                     
-                    this.tests.forEach(t => {
-                        const manualMins = t.manualMins || 0;
-                        const freq = t.freq || 0;
-                        const manualHours = this.calcManualMonthly(t).toFixed(1);
-                        const devHours = t.devHours || 0;
-                        const maintHours = t.maintHours || 0;
-                        const netSavings = this.calcNetSavings(t);
-                        const roi = this.calcROI(t);
-                        const rec = this.getRecommendation(t).text;
-                        
-                        // Escape quotes in names to prevent CSV breaks
-                        const safeName = (t.name || 'Unnamed').replace(/"/g, '""');
-                        
-                        csvContent += `"${safeName}","${manualMins}","${freq}","${manualHours}","${devHours}","${maintHours}","${netSavings}","${roi}","${rec}"\n`;
+                    const element = document.getElementById('dashboard-report');
+                    
+                    // PDF configuration
+                    const opt = {
+                        margin:       [0.3, 0.3, 0.3, 0.3], // Margins in inches
+                        filename:     `ROI_Report_${new Date().toISOString().split('T')[0]}.pdf`,
+                        image:        { type: 'jpeg', quality: 1 },
+                        html2canvas:  { 
+                            scale: 2, 
+                            useCORS: true,
+                            scrollY: 0,
+                            windowWidth: document.documentElement.offsetWidth // Prevents squishing on mobile
+                        },
+                        jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+                    };
+
+                    // Generate and save
+                    html2pdf().set(opt).from(element).save().then(() => {
+                        // Restore UI state
+                        iconEl.innerHTML = 'picture_as_pdf';
+                        iconEl.classList.remove('animate-spin');
+                        textEl.innerText = 'Export PDF';
                     });
-                    
-                    const encodedUri = encodeURI(csvContent);
-                    const link = document.createElement("a");
-                    link.setAttribute("href", encodedUri);
-                    link.setAttribute("download", "Automation_ROI_Report.csv");
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
                 }
             }));
         });
