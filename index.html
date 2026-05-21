@@ -3,108 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מחשבון ROI לאוטומציית בדיקות</title>
+    <title>מחשבון ROI ומטריצת החלטה לאוטומציה</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Rubik', sans-serif; }
-        /* Hide scrollbar for inputs */
         input[type="number"]::-webkit-inner-spin-button, 
         input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen py-10">
+<body class="bg-slate-900 text-slate-100 min-h-screen antialiased selection:bg-blue-500 selection:text-white">
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" x-data="roiCalculator">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" x-data="roiCalculator" x-init="initChart()">
         
-        <div class="text-center mb-10">
-            <h1 class="text-4xl font-bold text-blue-900 mb-3">מחשבון ROI לאוטומציית בדיקות 🤖</h1>
-            <p class="text-lg text-slate-600">כלי לקבלת החלטות - האם ומתי כדאי להפוך בדיקה ידנית לאוטומטית</p>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800 pb-8 mb-10 gap-4">
+            <div>
+                <span class="text-blue-400 text-sm font-semibold tracking-wider uppercase">QA & Automation Strategy</span>
+                <h1 class="text-4xl font-extrabold text-white mt-1 flex items-center gap-3">
+                    מחשבון ROI ומטריצת החלטה חכמה 🤖
+                </h1>
+                <p class="text-slate-400 mt-2 text-base max-w-2xl">
+                    כלי מתקדם לקבלת החלטות כלכליות ומקצועיות. משקלל נתוני זמנים לצד נורות אזהרה וסיכונים מתוך אסטרטגיית הבדיקות של הצוות.
+                </p>
+            </div>
+            <div class="flex gap-3">
+                <button @click="exportToCSV()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border border-slate-700 flex items-center gap-2 shadow-lg">
+                    📥 ייצוא דוח ל-CSV
+                </button>
+            </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-right">
-                    <thead class="bg-slate-800 text-white font-medium">
-                        <tr>
-                            <th class="px-4 py-4 w-1/4">שם הבדיקה / תיאור</th>
-                            <th class="px-4 py-4">זמן ידני<br><span class="text-xs font-normal text-slate-300">(דקות להרצה)</span></th>
-                            <th class="px-4 py-4">תדירות<br><span class="text-xs font-normal text-slate-300">(בחודש)</span></th>
-                            <th class="px-4 py-4">פיתוח אוטו'<br><span class="text-xs font-normal text-slate-300">(שעות)</span></th>
-                            <th class="px-4 py-4">תחזוקה<br><span class="text-xs font-normal text-slate-300">(שעות בחודש)</span></th>
-                            <th class="px-4 py-4 bg-blue-900">זמן חודשי נחסך<br><span class="text-xs font-normal text-slate-300">(שעות נטו)</span></th>
-                            <th class="px-4 py-4 bg-blue-900">חודשים לאיזון<br><span class="text-xs font-normal text-slate-300">(ROI)</span></th>
-                            <th class="px-4 py-4 bg-blue-900">המלצה סופית</th>
-                            <th class="px-4 py-4"></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200">
-                        <template x-for="(test, index) in tests" :key="index">
-                            <tr class="hover:bg-slate-50 transition-colors">
-                                <td class="px-4 py-3">
-                                    <input type="text" x-model="test.name" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                                </td>
-                                <td class="px-4 py-3">
-                                    <input type="number" x-model.number="test.manualMins" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 text-center">
-                                </td>
-                                <td class="px-4 py-3">
-                                    <input type="number" x-model.number="test.freq" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 text-center">
-                                </td>
-                                <td class="px-4 py-3">
-                                    <input type="number" x-model.number="test.devHours" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 text-center">
-                                </td>
-                                <td class="px-4 py-3">
-                                    <input type="number" x-model.number="test.maintHours" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 text-center">
-                                </td>
-                                <td class="px-4 py-3 text-center font-bold text-slate-700" x-text="calcNetSavings(test) + ' שעות'"></td>
-                                <td class="px-4 py-3 text-center font-bold" :class="getROIClass(test)" x-text="calcROI(test)"></td>
-                                <td class="px-4 py-3 text-center">
-                                    <span class="px-3 py-1 rounded-full text-xs font-bold" :class="getRecommendation(test).class" x-text="getRecommendation(test).text"></span>
-                                </td>
-                                <td class="px-4 py-3 text-center">
-                                    <button @click="removeRow(index)" class="text-red-400 hover:text-red-600 transition-colors" title="מחק שורה">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-                                    </button>
-                                </td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="bg-slate-100 p-6 flex items-center justify-between border-t border-slate-200">
-                <button @click="addRow()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-md flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
-                    הוסף בדיקה חדשה
-                </button>
-                <div class="text-xl font-bold text-slate-800">
-                    סה"כ חיסכון חודשי משוער בצוות: 
-                    <span class="text-blue-600 text-3xl ml-2" x-text="totalSavings"></span> 
-                    <span class="text-lg text-slate-500">שעות</span>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-slate-800/50 backdrop-blur border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+                <div class="absolute top-0 right-0 h-1 w-full bg-emerald-500"></div>
+                <p class="text-sm font-medium text-slate-400">סה"כ חיסכון חודשי נטו בצוות</p>
+                <div class="flex items-baseline gap-2 mt-2">
+                    <span class="text-4xl font-bold text-emerald-400 tracking-tight" x-text="totalSavings"></span>
+                    <span class="text-sm text-slate-400 font-medium">שעות בחודש</span>
                 </div>
             </div>
+            
+            <div class="bg-slate-800/50 backdrop-blur border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+                <div class="absolute top-0 right-0 h-1 w-full bg-blue-500"></div>
+                <p class="text-sm font-medium text-slate-400">זמן החזר השקעה ממוצע (ROI)</p>
+                <div class="flex items-baseline gap-2 mt-2">
+                    <span class="text-4xl font-bold text-blue-400 tracking-tight" x-text="avgROI"></span>
+                    <span class="text-sm text-slate-400 font-medium">חודשים לאיזון</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/50 backdrop-blur border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+                <div class="absolute top-0 right-0 h-1 w-full bg-purple-500"></div>
+                <p class="text-sm font-medium text-slate-400">בדיקות המומלצות לאוטומציה</p>
+                <div class="flex items-baseline gap-2 mt-2">
+                    <span class="text-4xl font-bold text-purple-400 tracking-tight" x-text="recommendedCount"></span>
+                    <span class="text-sm text-slate-400 font-medium" x-text="'מתוך ' + tests.length + ' תרחישים'"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            
+            <div class="lg:col-span-3 bg-slate-800 border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden">
+                <div class="px-6 py-4 bg-slate-800/80 border-b border-slate-700 flex justify-between items-center">
+                    <h2 class="text-lg font-semibold text-white">מערך הבדיקות המועמדות לאוטומציה</h2>
+                    <span class="text-xs bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full font-medium" x-text="tests.length + ' שורות פעילות'"></span>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-right whitespace-nowrap">
+                        <thead class="bg-slate-900/60 text-slate-400 text-xs uppercase tracking-wider font-semibold border-b border-slate-700">
+                            <tr>
+                                <th class="px-4 py-4 text-slate-200">שם התרחיש / הבדיקה</th>
+                                <th class="px-4 py-4 text-center">זמן ידני <span class="text-slate-500 text-[11px] block">(דקות להרצה)</span></th>
+                                <th class="px-4 py-4 text-center">תדירות <span class="text-slate-500 text-[11px] block">(בחודש)</span></th>
+                                <th class="px-4 py-4 text-center">פיתוח <span class="text-slate-500 text-[11px] block">(שעות עבודה)</span></th>
+                                <th class="px-4 py-4 text-center">תחזוקה <span class="text-slate-500 text-[11px] block">(שעות/חודש)</span></th>
+                                <th class="px-4 py-4 border-r border-slate-700/50 bg-slate-900/30 text-center">מאפיינים וסיכונים מיוחדים</th>
+                                <th class="px-4 py-4 bg-blue-950/40 text-blue-400 font-bold text-center">חיסכון נטו <span class="text-blue-500 text-[11px] block">(שעות חודשי)</span></th>
+                                <th class="px-4 py-4 bg-blue-950/40 text-blue-400 font-bold text-center">ROI <span class="text-blue-500 text-[11px] block">(חודשים לאיזון)</span></th>
+                                <th class="px-4 py-4 bg-slate-900/40 text-center">סטטוס והמלצה</th>
+                                <th class="px-4 py-4"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700/60">
+                            <template x-for="(test, index) in tests" :key="index">
+                                <tr class="hover:bg-slate-700/30 transition-colors group">
+                                    <td class="px-4 py-3.5">
+                                        <input type="text" x-model="test.name" @input="updateChart()" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-medium min-w-[220px]">
+                                    </td>
+                                    <td class="px-3 py-3.5 w-24">
+                                        <input type="number" x-model.number="test.manualMins" @input="updateChart()" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-2 text-center text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                                    </td>
+                                    <td class="px-3 py-3.5 w-24">
+                                        <input type="number" x-model.number="test.freq" @input="updateChart()" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-2 text-center text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                                    </td>
+                                    <td class="px-3 py-3.5 w-24">
+                                        <input type="number" x-model.number="test.devHours" @input="updateChart()" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-2 text-center text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                                    </td>
+                                    <td class="px-3 py-3.5 w-24">
+                                        <input type="number" x-model.number="test.maintHours" @input="updateChart()" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-2 text-center text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                                    </td>
+                                    <td class="px-4 py-3.5 border-r border-slate-700/50 bg-slate-900/10 min-w-[200px]">
+                                        <div class="flex flex-col gap-1 text-xs">
+                                            <label class="flex items-center gap-2 text-slate-400 hover:text-slate-200 cursor-pointer">
+                                                <input type="checkbox" x-model="test.isUnstableUi" @change="updateChart()" class="rounded border-slate-700 text-amber-500 focus:ring-amber-500/30 bg-slate-900">
+                                                <span :class="test.isUnstableUi ? 'text-amber-400 font-medium' : ''">⚠️ UI שברירי/משתנה תכופות</span>
+                                            </label>
+                                            <label class="flex items-center gap-2 text-slate-400 hover:text-slate-200 cursor-pointer">
+                                                <input type="checkbox" x-model="test.isSubjective" @change="updateChart()" class="rounded border-slate-700 text-amber-500 focus:ring-amber-500/30 bg-slate-900">
+                                                <span :class="test.isSubjective ? 'text-amber-400 font-medium' : ''">🧠 דורש שיפוט אנושי (UX/יופי)</span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3.5 text-center font-bold text-slate-200 bg-blue-950/20" x-text="calcNetSavings(test) + ' ש\''"></td>
+                                    <td class="px-4 py-3.5 text-center font-bold bg-blue-950/20" :class="getROIClass(test)" x-text="calcROI(test) === '∞' ? '∞' : calcROI(test) + ' חוד\''"></td>
+                                    <td class="px-4 py-3.5 text-center">
+                                        <span class="px-3 py-1.5 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 shadow-sm border" :class="getRecommendation(test).class" x-text="getRecommendation(test).text"></span>
+                                    </td>
+                                    <td class="px-4 py-3.5 text-center w-12">
+                                        <button @click="removeRow(index)" class="text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-slate-900/50 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100" title="מחק שורה">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="p-4 bg-slate-900/40 border-t border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <button @click="addRow()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-blue-600/10 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                        הוסף בדיקה / תרחיש חדש
+                    </button>
+                    <div class="text-xs text-slate-400 italic">
+                        💡 טיפ: לוגיקת החישוב מורידה אוטומטית את שעות התחזוקה מהחיסכון הידני ברוטו.
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3 bg-slate-800 border border-slate-700/50 rounded-2xl shadow-2xl p-6">
+                <h3 class="text-base font-semibold text-white mb-4 flex items-center gap-2">
+                    📊 ניתוח חזותי: זמן בדיקה ידנית נוכחי מול עלות תחזוקת אוטומציה חודשית (שעות)
+                </h3>
+                <div class="h-64 w-full relative">
+                    <canvas id="roiChart"></canvas>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('roiCalculator', () => ({
-                // טעינת הנתונים מה-CSV המקורי
                 tests: [
-                    { name: "בדיקת רגרסיה ראשית (רצה בכל Build)", manualMins: 10, freq: 90, devHours: 2, maintHours: 0.5 },
-                    { name: "בדיקת עשן (Smoke Test על כל PR)", manualMins: 5, freq: 60, devHours: 4, maintHours: 0.2 },
-                    { name: "בדיקת דפדפנים מרובים (Multi-browser)", manualMins: 20, freq: 30, devHours: 6, maintHours: 1 },
-                    { name: "פיצ'ר חדש עם UI לא יציב (משתנה כל ספרינט)", manualMins: 15, freq: 8, devHours: 12, maintHours: 5 },
-                    { name: "בדיקה חקירתית חד-פעמית (Exploratory)", manualMins: 45, freq: 1, devHours: 20, maintHours: 2 },
-                    { name: "בדיקה מונעת-נתונים (Data-Driven Test)", manualMins: 30, freq: 25, devHours: 5, maintHours: 0.5 }
+                    { name: "בדיקת רגרסיה ראשית (רצה בכל Build)", manualMins: 10, freq: 90, devHours: 2, maintHours: 0.5, isUnstableUi: false, isSubjective: false },
+                    { name: "בדיקת עשן (Smoke Test על כל PR)", manualMins: 5, freq: 60, devHours: 4, maintHours: 0.2, isUnstableUi: false, isSubjective: false },
+                    { name: "בדיקת דפדפנים מרובים (Multi-browser)", manualMins: 20, freq: 30, devHours: 6, maintHours: 1, isUnstableUi: false, isSubjective: false },
+                    { name: "פיצ'ר חדש עם UI לא יציב", manualMins: 15, freq: 8, devHours: 12, maintHours: 5, isUnstableUi: true, isSubjective: false },
+                    { name: "בדיקה חקירתית חד-פעמית (Exploratory)", manualMins: 45, freq: 1, devHours: 20, maintHours: 2, isUnstableUi: false, isSubjective: true },
+                    { name: "בדיקה מונעת-נתונים (Data-Driven Test)", manualMins: 30, freq: 25, devHours: 5, maintHours: 0.5, isUnstableUi: false, isSubjective: false }
                 ],
+                chartInstance: null,
+
                 calcManualMonthly(test) {
                     return ((test.manualMins * test.freq) / 60);
                 },
                 calcNetSavings(test) {
-                    return (this.calcManualMonthly(test) - test.maintHours).toFixed(1);
+                    const savings = this.calcManualMonthly(test) - test.maintHours;
+                    return Math.max(savings, -test.maintHours).toFixed(1);
                 },
                 calcROI(test) {
                     const savings = parseFloat(this.calcNetSavings(test));
@@ -113,32 +185,138 @@
                 },
                 getROIClass(test) {
                     const roi = parseFloat(this.calcROI(test));
-                    if (isNaN(roi)) return 'text-red-500';
-                    if (roi <= 3) return 'text-green-600';
-                    if (roi <= 6) return 'text-yellow-600';
-                    return 'text-red-500';
+                    if (this.calcROI(test) === '∞' || roi > 6) return 'text-rose-400';
+                    if (roi <= 3) return 'text-emerald-400';
+                    return 'text-amber-400';
                 },
                 getRecommendation(test) {
+                    // Critical Red Flags checking from PDF logic
+                    if (test.isUnstableUi || test.isSubjective) {
+                        return { text: 'שקול שוב (נורת אזהרה) ⚠️', class: 'bg-amber-500/10 text-amber-400 border-amber-500/30' };
+                    }
+                    
                     const savings = parseFloat(this.calcNetSavings(test));
-                    if (savings <= 0) return { text: 'לא מומלץ ❌', class: 'text-red-700 bg-red-100' };
+                    if (savings <= 0) return { text: 'להשאיר ידני ❌', class: 'bg-rose-500/10 text-rose-400 border-rose-500/30' };
                     
                     const roi = test.devHours / savings;
-                    if (roi <= 3) return { text: 'מומלץ בחום 🔥', class: 'text-green-700 bg-green-100' };
-                    if (roi <= 6) return { text: 'כדאי לשקול 🤔', class: 'text-yellow-700 bg-yellow-100' };
+                    if (roi <= 3) return { text: 'אוטומציה מיידית 🔥', class: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' };
+                    if (roi <= 6) return { text: 'כדאי לשקול כספק סביר 🤔', class: 'bg-blue-500/10 text-blue-400 border-blue-500/30' };
                     
-                    return { text: 'עדיפות נמוכה ⏳', class: 'text-slate-700 bg-slate-200' };
+                    return { text: 'עדיפות נמוכה ⏳', class: 'bg-slate-700/50 text-slate-400 border-slate-600/50' };
                 },
+                
+                // Top Global KPI Computed Values
                 get totalSavings() {
                     return this.tests.reduce((sum, test) => {
                         const savings = parseFloat(this.calcNetSavings(test));
                         return sum + (savings > 0 ? savings : 0);
                     }, 0).toFixed(1);
                 },
+                get avgROI() {
+                    let validCount = 0;
+                    const totalRoi = this.tests.reduce((sum, test) => {
+                        const roi = parseFloat(this.calcROI(test));
+                        if (!isNaN(roi) && this.calcROI(test) !== '∞' && !test.isUnstableUi && !test.isSubjective) {
+                            validCount++;
+                            return sum + roi;
+                        }
+                        return sum;
+                    }, 0);
+                    return validCount > 0 ? (totalRoi / validCount).toFixed(1) : 'N/A';
+                },
+                get recommendedCount() {
+                    return this.tests.filter(test => {
+                        const rec = this.getRecommendation(test).text;
+                        return rec === 'אוטומציה מיידית 🔥' || rec === 'כדאי לשקול כספק סביר 🤔';
+                    }).length;
+                },
+
+                // Row Actions
                 addRow() {
-                    this.tests.push({ name: "", manualMins: 0, freq: 0, devHours: 0, maintHours: 0 });
+                    this.tests.push({ name: "", manualMins: 0, freq: 0, devHours: 0, maintHours: 0, isUnstableUi: false, isSubjective: false });
+                    this.updateChart();
                 },
                 removeRow(index) {
                     this.tests.splice(index, 1);
+                    this.updateChart();
+                },
+
+                // Chart Rendering & Dynamic Updates
+                initChart() {
+                    this.$nextTick(() => {
+                        const ctx = document.getElementById('roiChart').getContext('20d');
+                        this.chartInstance = new Chart(ctx, {
+                            type: 'bar',
+                            data: this.getChartData(),
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { labels: { color: '#94a3b8', font: { family: 'Rubik' } } }
+                                },
+                                scales: {
+                                    x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8', font: { family: 'Rubik' } } },
+                                    y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' }, title: { display: true, text: 'שעות בחודש', color: '#94a3b8' } }
+                                }
+                            }
+                        });
+                    });
+                },
+                getChartData() {
+                    return {
+                        labels: this.tests.map(t => t.name || 'תרחיש ללא שם'),
+                        datasets: [
+                            {
+                                label: 'זמן בדיקה ידנית (שעות/חודש)',
+                                data: this.tests.map(t => this.calcManualMonthly(t).toFixed(1)),
+                                backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                                borderColor: 'rgb(59, 130, 246)',
+                                borderWidth: 1,
+                                borderRadius: 6
+                            },
+                            {
+                                label: 'זמן תחזוקת אוטומציה (שעות/חודש)',
+                                data: this.tests.map(t => t.maintHours),
+                                backgroundColor: 'rgba(244, 63, 94, 0.6)',
+                                borderColor: 'rgb(244, 63, 94)',
+                                borderWidth: 1,
+                                borderRadius: 6
+                            }
+                        ]
+                    };
+                },
+                updateChart() {
+                    if (this.chartInstance) {
+                        this.chartInstance.data = this.getChartData();
+                        this.chartInstance.update();
+                    }
+                },
+
+                // Export Table to CSV Format File
+                exportToCSV() {
+                    let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+                    csvContent += "שם הבדיקה,זמן ידני (דקות),תדירות בחודש,זמן ידני חודשי (שעות),פיתוח אוטומציה (שעות),תחזוקה חודשית (שעות),חיסכון חודשי נטו (שעות),חודשים לאיזון (ROI),המלצה סופית\n";
+                    
+                    this.tests.forEach(t => {
+                        const manualMins = t.manualMins || 0;
+                        const freq = t.freq || 0;
+                        const manualHours = this.calcManualMonthly(t).toFixed(1);
+                        const devHours = t.devHours || 0;
+                        const maintHours = t.maintHours || 0;
+                        const netSavings = this.calcNetSavings(t);
+                        const roi = this.calcROI(t);
+                        const rec = this.getRecommendation(t).text.replace(/[❌🔥🤔⏳⚠️]/g, '').trim();
+                        
+                        csvContent += `"${t.name || 'ללא שם'}",${manualMins},${freq},${manualHours},${devHours},${maintHours},${netSavings},${roi},"${rec}"\n`;
+                    });
+                    
+                    const encodedUri = encodeURI(csvContent);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", encodedUri);
+                    link.setAttribute("download", "Automation_ROI_Report.csv");
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
                 }
             }));
         });
