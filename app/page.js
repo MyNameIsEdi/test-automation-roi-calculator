@@ -27,6 +27,15 @@ export default function Dashboard() {
 
   useEffect(() => {
     const checkUser = async () => {
+      const isDemoMode = typeof window !== 'undefined' && localStorage.getItem('demo_mode') === 'true';
+      
+      if (isDemoMode) {
+        const demoUserId = localStorage.getItem('user_id') || 'demo-user';
+        setUser({ id: demoUserId, email: 'demo@example.com' });
+        fetchScenariosDemo(demoUserId);
+        return;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         router.push('/auth');
@@ -37,6 +46,16 @@ export default function Dashboard() {
     };
     checkUser();
   }, []);
+
+  const fetchScenariosDemo = (userId) => {
+    const savedScenarios = localStorage.getItem(`scenarios_${userId}`);
+    if (savedScenarios) {
+      setScenarios(JSON.parse(savedScenarios));
+    } else {
+      setScenarios(DEFAULT_SCENARIOS.map(s => ({ ...s, user_id: userId, id: Math.random() })));
+    }
+    setLoading(false);
+  };
 
   const fetchScenarios = async (userId) => {
     const { data, error } = await supabase
@@ -57,6 +76,14 @@ export default function Dashboard() {
 
   const saveAll = async () => {
     setSaving(true);
+    const isDemoMode = localStorage.getItem('demo_mode') === 'true';
+    
+    if (isDemoMode) {
+      localStorage.setItem(`scenarios_${user.id}`, JSON.stringify(scenarios));
+      setSaving(false);
+      return;
+    }
+
     // Delete existing and re-insert for simplicity in this version
     await supabase.from('scenarios').delete().eq('user_id', user.id);
     const { error } = await supabase.from('scenarios').insert(
@@ -85,6 +112,12 @@ export default function Dashboard() {
   };
 
   const logout = async () => {
+    const isDemoMode = localStorage.getItem('demo_mode') === 'true';
+    if (isDemoMode) {
+      localStorage.setItem('demo_mode', 'false');
+      router.push('/auth');
+      return;
+    }
     await supabase.auth.signOut();
     router.push('/auth');
   };
@@ -148,6 +181,9 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-[10px] font-bold tracking-widest uppercase rounded">Strategy Matrix</span>
+            {localStorage.getItem('demo_mode') === 'true' && (
+              <span className="px-2 py-0.5 bg-amber-50 text-amber-600 text-[10px] font-bold tracking-widest uppercase rounded">Demo Mode</span>
+            )}
             <span className="text-slate-300">•</span>
             <span className="text-slate-400 text-xs font-medium">{user?.email}</span>
           </div>

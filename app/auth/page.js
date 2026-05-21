@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { LogIn, UserPlus, ArrowRight, Loader2 } from 'lucide-react';
+import { LogIn, UserPlus, ArrowRight, Loader2, Zap } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AuthPage() {
@@ -12,6 +12,13 @@ export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState(null);
   const router = useRouter();
+
+  const handleDemoMode = () => {
+    // Set demo mode flag in localStorage
+    localStorage.setItem('demo_mode', 'true');
+    localStorage.setItem('user_id', 'demo-user-' + Date.now());
+    router.push('/');
+  };
 
   const handleAuth = async (e) => {
     e.preventDefault();
@@ -26,6 +33,7 @@ export default function AuthPage() {
       setError(error.message);
       setLoading(false);
     } else {
+      localStorage.setItem('demo_mode', 'false');
       router.push('/');
     }
   };
@@ -78,13 +86,32 @@ export default function AuthPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-slate-100 text-center">
+          <div className="mt-6 pt-6 border-t border-slate-100 space-y-4">
             <button 
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-indigo-600 font-semibold hover:text-indigo-700"
+              className="w-full text-sm text-indigo-600 font-semibold hover:text-indigo-700"
             >
               {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
             </button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-2 bg-white text-slate-500">or</span>
+              </div>
+            </div>
+
+            <button 
+              type="button"
+              onClick={handleDemoMode}
+              className="w-full py-2 px-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg font-semibold text-amber-700 hover:from-amber-100 hover:to-orange-100 transition flex items-center justify-center gap-2"
+            >
+              <Zap size={18} />
+              Try Demo Mode
+            </button>
+            <p className="text-xs text-slate-500 text-center">Demo mode uses local storage - your data won't persist</p>
           </div>
         </div>
       </div>
