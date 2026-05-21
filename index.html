@@ -17,135 +17,135 @@
         .material-icons-outlined { vertical-align: middle; line-height: 1; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-blue-600 selection:text-white">
+<body class="bg-[#f9f6f1] text-[#2d2e36] min-h-screen antialiased selection:bg-[#2d59b2] selection:text-white">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" x-data="roiCalculator" x-init="initChart()">
         
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-slate-800 pb-8 mb-10 gap-6">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-[#ede7dc] pb-8 mb-10 gap-6">
             <div>
-                <div class="flex items-center gap-2 text-blue-400 text-xs font-semibold tracking-widest uppercase">
-                    <span class="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
+                <div class="flex items-center gap-2 text-[#2d59b2] text-xs font-bold tracking-widest uppercase">
+                    <span class="h-2 w-2 rounded-full bg-[#2d59b2]"></span>
                     Automation Strategy Matrix
                 </div>
-                <h1 class="text-4xl font-extrabold tracking-tight text-white mt-2 flex items-center gap-3">
-                    <span class="material-icons-outlined text-4xl text-blue-500 bg-blue-500/10 p-2 rounded-xl">smart_toy</span>
+                <h1 class="text-4xl font-extrabold tracking-tight text-[#2d2e36] mt-2 flex items-center gap-3">
+                    <span class="material-icons-outlined text-3xl text-[#2d59b2] bg-[#2d59b2]/10 p-2.5 rounded-xl">smart_toy</span>
                     ROI Analysis Tool
                 </h1>
-                <p class="text-slate-400 mt-2 text-sm max-w-2xl leading-relaxed">
+                <p class="text-[#8a8780] mt-2 text-sm max-w-2xl leading-relaxed">
                     Balance engineering overhead against pipeline execution gains. Input parameters below to automatically flag brittle targets and track net team hours saved.
                 </p>
             </div>
             <div class="flex items-center gap-3 self-start lg:self-center">
-                <button @click="exportToCSV()" class="bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 hover:border-slate-700 px-5 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 flex items-center gap-2 shadow-xl group">
-                    <span class="material-icons-outlined text-slate-400 group-hover:text-white transition-colors text-lg">file_download</span>
+                <button @click="exportToCSV()" class="bg-white hover:bg-[#f1eee8] text-[#2d2e36] border border-[#ede7dc] px-5 py-3 rounded-xl text-xs font-bold tracking-wide transition-all duration-200 flex items-center gap-2 shadow-sm group">
+                    <span class="material-icons-outlined text-[#8a8780] group-hover:text-[#2d2e36] transition-colors text-lg">file_download</span>
                     EXPORT REPORT (.CSV)
                 </button>
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="bg-slate-900/40 backdrop-blur border border-slate-800/80 rounded-2xl p-6 shadow-2xl relative overflow-hidden transition-all duration-300 hover:border-slate-700/60 group">
+            <div class="bg-white border border-[#ede7dc] rounded-2xl p-6 shadow-sm relative overflow-hidden transition-all duration-300 hover:shadow-md group">
                 <div class="flex justify-between items-start">
-                    <p class="text-xs font-bold tracking-wider text-slate-400 uppercase">Net Monthly Savings</p>
-                    <span class="material-icons-outlined text-emerald-500 bg-emerald-500/10 p-1.5 rounded-lg text-lg">trending_up</span>
+                    <p class="text-xs font-bold tracking-wider text-[#8a8780] uppercase">Net Monthly Savings</p>
+                    <span class="material-icons-outlined text-[#2d59b2] bg-[#2d59b2]/10 p-1.5 rounded-lg text-lg">trending_up</span>
                 </div>
                 <div class="flex items-baseline gap-2 mt-4">
-                    <span class="text-4xl font-extrabold text-emerald-400 tracking-tight transition-all duration-300 group-hover:scale-105 inline-block origin-left" x-text="totalSavings"></span>
-                    <span class="text-xs text-slate-500 font-medium uppercase tracking-wide">hours / mo</span>
+                    <span class="text-4xl font-extrabold text-[#2d59b2] tracking-tight transition-all duration-300 group-hover:scale-105 inline-block origin-left" x-text="totalSavings"></span>
+                    <span class="text-xs text-[#8a8780] font-medium uppercase tracking-wide">hours / mo</span>
                 </div>
             </div>
             
-            <div class="bg-slate-900/40 backdrop-blur border border-slate-800/80 rounded-2xl p-6 shadow-2xl relative overflow-hidden transition-all duration-300 hover:border-slate-700/60 group">
+            <div class="bg-white border border-[#ede7dc] rounded-2xl p-6 shadow-sm relative overflow-hidden transition-all duration-300 hover:shadow-md group">
                 <div class="flex justify-between items-start">
-                    <p class="text-xs font-bold tracking-wider text-slate-400 uppercase">Average Break-Even</p>
-                    <span class="material-icons-outlined text-blue-500 bg-blue-500/10 p-1.5 rounded-lg text-lg">date_range</span>
+                    <p class="text-xs font-bold tracking-wider text-[#8a8780] uppercase">Average Break-Even</p>
+                    <span class="material-icons-outlined text-amber-700 bg-amber-500/10 p-1.5 rounded-lg text-lg">date_range</span>
                 </div>
                 <div class="flex items-baseline gap-2 mt-4">
-                    <span class="text-4xl font-extrabold text-blue-400 tracking-tight transition-all duration-300 group-hover:scale-105 inline-block origin-left" x-text="avgROI"></span>
-                    <span class="text-xs text-slate-500 font-medium uppercase tracking-wide">months</span>
+                    <span class="text-4xl font-extrabold text-amber-700 tracking-tight transition-all duration-300 group-hover:scale-105 inline-block origin-left" x-text="avgROI"></span>
+                    <span class="text-xs text-[#8a8780] font-medium uppercase tracking-wide">months</span>
                 </div>
             </div>
 
-            <div class="bg-slate-900/40 backdrop-blur border border-slate-800/80 rounded-2xl p-6 shadow-2xl relative overflow-hidden transition-all duration-300 hover:border-slate-700/60 group">
+            <div class="bg-white border border-[#ede7dc] rounded-2xl p-6 shadow-sm relative overflow-hidden transition-all duration-300 hover:shadow-md group">
                 <div class="flex justify-between items-start">
-                    <p class="text-xs font-bold tracking-wider text-slate-400 uppercase">Target Recommendations</p>
-                    <span class="material-icons-outlined text-purple-500 bg-purple-500/10 p-1.5 rounded-lg text-lg">assignment_turned_in</span>
+                    <p class="text-xs font-bold tracking-wider text-[#8a8780] uppercase">Target Recommendations</p>
+                    <span class="material-icons-outlined text-[#2d59b2] bg-[#a8bfe6]/30 p-1.5 rounded-lg text-lg">assignment_turned_in</span>
                 </div>
                 <div class="flex items-baseline gap-2 mt-4">
-                    <span class="text-4xl font-extrabold text-purple-400 tracking-tight transition-all duration-300 group-hover:scale-105 inline-block origin-left" x-text="recommendedCount"></span>
-                    <span class="text-xs text-slate-500 font-medium" x-text="'of ' + tests.length + ' mapped'"></span>
+                    <span class="text-4xl font-extrabold text-slate-800 tracking-tight transition-all duration-300 group-hover:scale-105 inline-block origin-left" x-text="recommendedCount"></span>
+                    <span class="text-xs text-[#8a8780] font-medium" x-text="'of ' + tests.length + ' mapped'"></span>
                 </div>
             </div>
         </div>
 
         <div class="grid grid-cols-1 gap-8 items-start">
             
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
-                <div class="px-6 py-5 border-b border-slate-800 bg-slate-900/50 flex justify-between items-center">
+            <div class="bg-white border border-[#ede7dc] rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-6 py-5 border-b border-[#ede7dc] bg-[#f1eee8]/40 flex justify-between items-center">
                     <div class="flex items-center gap-2">
-                        <span class="material-icons-outlined text-slate-400 text-lg">list_alt</span>
-                        <h2 class="text-sm font-bold uppercase tracking-wider text-white">Target Selection Parameters</h2>
+                        <span class="material-icons-outlined text-[#8a8780] text-lg">list_alt</span>
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-[#2d2e36]">Target Selection Parameters</h2>
                     </div>
                 </div>
                 
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left whitespace-nowrap">
-                        <thead class="bg-slate-950/60 text-slate-400 text-[10px] font-bold uppercase tracking-widest border-b border-slate-800">
+                        <thead class="bg-[#f1eee8]/60 text-[#8a8780] text-[10px] font-bold uppercase tracking-widest border-b border-[#ede7dc]">
                             <tr>
-                                <th class="px-6 py-4 text-slate-300">Test Scenario Description</th>
-                                <th class="px-3 py-4 text-center">Manual Mins <span class="text-slate-600 block lowercase font-normal text-[10px] mt-0.5">(per run)</span></th>
+                                <th class="px-6 py-4 text-[#2d2e36]">Test Scenario Description</th>
+                                <th class="px-3 py-4 text-center">Manual Mins <span class="text-[#8a8780] block lowercase font-normal text-[10px] mt-0.5">(per run)</span></th>
                                 <th class="px-3 py-4 text-center">Runs / Mo</th>
-                                <th class="px-3 py-4 text-center">Dev Hours <span class="text-slate-600 block lowercase font-normal text-[10px] mt-0.5">(initial setup)</span></th>
-                                <th class="px-3 py-4 text-center">Maint Hours <span class="text-slate-600 block lowercase font-normal text-[10px] mt-0.5">(per month)</span></th>
-                                <th class="px-6 py-4 border-l border-slate-800 bg-slate-950/20 text-center">Qualitative Architecture Risks</th>
-                                <th class="px-4 py-4 bg-slate-950/40 text-blue-400 text-center font-bold">Net Saved <span class="text-slate-600 block lowercase font-normal text-[10px] mt-0.5">(hours / mo)</span></th>
-                                <th class="px-4 py-4 bg-slate-950/40 text-blue-400 text-center font-bold">Break-Even <span class="text-slate-600 block lowercase font-normal text-[10px] mt-0.5">(months)</span></th>
-                                <th class="px-6 py-4 bg-slate-950/30 text-center">Strategic Action</th>
+                                <th class="px-3 py-4 text-center">Dev Hours <span class="text-[#8a8780] block lowercase font-normal text-[10px] mt-0.5">(initial setup)</span></th>
+                                <th class="px-3 py-4 text-center">Maint Hours <span class="text-[#8a8780] block lowercase font-normal text-[10px] mt-0.5">(per month)</span></th>
+                                <th class="px-6 py-4 border-l border-[#ede7dc] bg-[#f1eee8]/20 text-center">Qualitative Architecture Risks</th>
+                                <th class="px-4 py-4 bg-[#f1eee8]/30 text-[#2d59b2] text-center font-bold">Net Saved <span class="text-[#8a8780] block lowercase font-normal text-[10px] mt-0.5">(hours / mo)</span></th>
+                                <th class="px-4 py-4 bg-[#f1eee8]/30 text-[#2d59b2] text-center font-bold">Break-Even <span class="text-[#8a8780] block lowercase font-normal text-[10px] mt-0.5">(months)</span></th>
+                                <th class="px-6 py-4 bg-[#f1eee8]/10 text-center">Strategic Action</th>
                                 <th class="px-4 py-4"></th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-800/60">
+                        <tbody class="divide-y divide-[#ede7dc]/60">
                             <template x-for="(test, index) in tests" :key="index">
-                                <tr class="hover:bg-slate-850/20 transition-all duration-150 group">
+                                <tr class="hover:bg-[#f1eee8]/20 transition-all duration-150 group">
                                     <td class="px-6 py-3.5">
-                                        <input type="text" x-model="test.name" @input="updateChart()" placeholder="e.g., Auth Flow Validation" class="w-full bg-slate-950 border border-slate-800/80 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 font-medium min-w-[260px] shadow-inner">
+                                        <input type="text" x-model="test.name" @input="updateChart()" placeholder="e.g., Auth Flow Validation" class="w-full bg-[#f9f6f1]/50 border border-[#ede7dc] rounded-xl px-4 py-2.5 text-xs text-[#2d2e36] placeholder-slate-400 focus:outline-none focus:border-[#2d59b2] focus:ring-4 focus:ring-[#2d59b2]/5 transition-all duration-200 font-medium min-w-[260px]">
                                     </td>
                                     <td class="px-2 py-3.5 w-24">
-                                        <input type="number" x-model.number="test.manualMins" @input="updateChart()" class="w-full bg-slate-950 border border-slate-800/80 rounded-xl p-2.5 text-center text-xs font-semibold text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 shadow-inner">
+                                        <input type="number" x-model.number="test.manualMins" @input="updateChart()" class="w-full bg-[#f9f6f1]/50 border border-[#ede7dc] rounded-xl p-2.5 text-center text-xs font-semibold text-[#2d2e36] focus:outline-none focus:border-[#2d59b2] focus:ring-4 focus:ring-[#2d59b2]/5 transition-all duration-200">
                                     </td>
                                     <td class="px-2 py-3.5 w-24">
-                                        <input type="number" x-model.number="test.freq" @input="updateChart()" class="w-full bg-slate-950 border border-slate-800/80 rounded-xl p-2.5 text-center text-xs font-semibold text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 shadow-inner">
+                                        <input type="number" x-model.number="test.freq" @input="updateChart()" class="w-full bg-[#f9f6f1]/50 border border-[#ede7dc] rounded-xl p-2.5 text-center text-xs font-semibold text-[#2d2e36] focus:outline-none focus:border-[#2d59b2] focus:ring-4 focus:ring-[#2d59b2]/5 transition-all duration-200">
                                     </td>
                                     <td class="px-2 py-3.5 w-24">
-                                        <input type="number" x-model.number="test.devHours" @input="updateChart()" class="w-full bg-slate-950 border border-slate-800/80 rounded-xl p-2.5 text-center text-xs font-semibold text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 shadow-inner">
+                                        <input type="number" x-model.number="test.devHours" @input="updateChart()" class="w-full bg-[#f9f6f1]/50 border border-[#ede7dc] rounded-xl p-2.5 text-center text-xs font-semibold text-[#2d2e36] focus:outline-none focus:border-[#2d59b2] focus:ring-4 focus:ring-[#2d59b2]/5 transition-all duration-200">
                                     </td>
                                     <td class="px-2 py-3.5 w-24">
-                                        <input type="number" x-model.number="test.maintHours" @input="updateChart()" class="w-full bg-slate-950 border border-slate-800/80 rounded-xl p-2.5 text-center text-xs font-semibold text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 shadow-inner">
+                                        <input type="number" x-model.number="test.maintHours" @input="updateChart()" class="w-full bg-[#f9f6f1]/50 border border-[#ede7dc] rounded-xl p-2.5 text-center text-xs font-semibold text-[#2d2e36] focus:outline-none focus:border-[#2d59b2] focus:ring-4 focus:ring-[#2d59b2]/5 transition-all duration-200">
                                     </td>
-                                    <td class="px-6 py-3.5 border-l border-slate-800 bg-slate-950/10 min-w-[320px]">
+                                    <td class="px-6 py-3.5 border-l border-[#ede7dc] bg-[#f1eee8]/10 min-w-[320px]">
                                         <div class="flex gap-2 text-[11px] font-medium select-none">
                                             <button @click="test.isUnstableUi = !test.isUnstableUi; updateChart()" 
-                                                    :class="test.isUnstableUi ? 'bg-amber-500/10 border-amber-500/40 text-amber-400 shadow-lg shadow-amber-500/5' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300 hover:border-slate-700'"
+                                                    :class="test.isUnstableUi ? 'bg-[#e1c49f]/20 border-[#e1c49f] text-amber-900 font-bold' : 'bg-white border-[#ede7dc] text-[#8a8780] hover:text-[#2d2e36] hover:border-slate-400'"
                                                     class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all duration-150">
-                                                <span class="material-icons-outlined text-xs">report_problem</span> Flaky/Shifting UI
+                                                <span class="material-icons-outlined text-xs">report_problem</span> Flaky UI
                                             </button>
                                             <button @click="test.isSubjective = !test.isSubjective; updateChart()" 
-                                                    :class="test.isSubjective ? 'bg-amber-500/10 border-amber-500/40 text-amber-400 shadow-lg shadow-amber-500/5' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300 hover:border-slate-700'"
+                                                    :class="test.isSubjective ? 'bg-[#e1c49f]/20 border-[#e1c49f] text-amber-900 font-bold' : 'bg-white border-[#ede7dc] text-[#8a8780] hover:text-[#2d2e36] hover:border-slate-400'"
                                                     class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all duration-150">
                                                 <span class="material-icons-outlined text-xs">psychology</span> Subjective UX
                                             </button>
                                         </div>
                                     </td>
-                                    <td class="px-4 py-3.5 text-center font-bold text-xs text-slate-200 bg-slate-950/20" x-text="calcNetSavings(test) + ' hrs'"></td>
-                                    <td class="px-4 py-3.5 text-center font-bold text-xs bg-slate-950/20" :class="getROIClass(test)" x-text="calcROI(test) === '∞' ? '∞' : calcROI(test) + ' mo'"></td>
+                                    <td class="px-4 py-3.5 text-center font-bold text-xs text-[#2d2e36] bg-[#f1eee8]/10" x-text="calcNetSavings(test) + ' hrs'"></td>
+                                    <td class="px-4 py-3.5 text-center font-bold text-xs bg-[#f1eee8]/10" :class="getROIClass(test)" x-text="calcROI(test) === '∞' ? '∞' : calcROI(test) + ' mo'"></td>
                                     <td class="px-6 py-3.5 text-center">
-                                        <span class="px-3 py-1.5 rounded-xl text-[11px] font-bold tracking-wide uppercase inline-flex items-center gap-1.5 shadow-md border" :class="getRecommendation(test).class">
+                                        <span class="px-3 py-1.5 rounded-xl text-[11px] font-bold tracking-wide uppercase inline-flex items-center gap-1.5 border" :class="getRecommendation(test).class">
                                             <span class="material-icons-outlined text-xs" x-text="getRecommendation(test).icon"></span>
                                             <span x-text="getRecommendation(test).text"></span>
                                         </span>
                                     </td>
                                     <td class="px-4 py-3.5 text-center w-12">
-                                        <button @click="removeRow(index)" class="text-slate-500 hover:text-rose-400 p-2 rounded-lg hover:bg-slate-950 transition-all duration-150 opacity-0 group-hover:opacity-100 focus:opacity-100" title="Delete Row">
+                                        <button @click="removeRow(index)" class="text-[#8a8780] hover:text-rose-600 p-2 rounded-lg hover:bg-rose-50 transition-all duration-150 opacity-0 group-hover:opacity-100 focus:opacity-100" title="Delete Row">
                                             <span class="material-icons-outlined text-lg">delete_outline</span>
                                         </button>
                                     </td>
@@ -155,22 +155,22 @@
                     </table>
                 </div>
                 
-                <div class="p-5 bg-slate-950/40 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <button @click="addRow()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-5 py-3 rounded-xl text-xs font-bold tracking-wider uppercase transition-all duration-150 shadow-xl shadow-blue-600/10 flex items-center justify-center gap-2">
+                <div class="p-5 bg-[#f1eee8]/30 border-t border-[#ede7dc] flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <button @click="addRow()" class="w-full sm:w-auto bg-[#2d59b2] hover:bg-[#1e408a] text-white px-5 py-3 rounded-xl text-xs font-bold tracking-wider uppercase transition-all duration-150 shadow-sm flex items-center justify-center gap-2">
                         <span class="material-icons-outlined text-lg">add</span>
                         Add Assessment Entry
                     </button>
-                    <div class="text-[11px] text-slate-500 flex items-center gap-1.5">
-                        <span class="material-icons-outlined text-sm text-blue-500">info</span>
+                    <div class="text-[11px] text-[#8a8780] flex items-center gap-1.5">
+                        <span class="material-icons-outlined text-sm text-[#2d59b2]">info</span>
                         Framework automatically penalizes savings values against monthly structural maintenance targets.
                     </div>
                 </div>
             </div>
 
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6">
+            <div class="bg-white border border-[#ede7dc] rounded-2xl shadow-sm p-6">
                 <div class="flex items-center gap-2 mb-6">
-                    <span class="material-icons-outlined text-slate-400 text-lg">bar_chart</span>
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-white">
+                    <span class="material-icons-outlined text-[#8a8780] text-lg">bar_chart</span>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-[#2d2e36]">
                         Resource Consumption Vectors
                     </h3>
                 </div>
@@ -209,23 +209,23 @@
                 },
                 getROIClass(test) {
                     const roi = parseFloat(this.calcROI(test));
-                    if (this.calcROI(test) === '∞' || roi > 6) return 'text-rose-400';
-                    if (roi <= 3) return 'text-emerald-400';
-                    return 'text-amber-400';
+                    if (this.calcROI(test) === '∞' || roi > 6) return 'text-rose-600';
+                    if (roi <= 3) return 'text-emerald-600';
+                    return 'text-amber-600';
                 },
                 getRecommendation(test) {
                     if (test.isUnstableUi || test.isSubjective) {
-                        return { text: 'Reconsider Risks', icon: 'warning', class: 'bg-amber-500/10 text-amber-400 border-amber-500/20' };
+                        return { text: 'Reconsider Risks', icon: 'warning', class: 'bg-[#e1c49f]/10 text-amber-800 border-[#e1c49f]/40' };
                     }
                     
                     const savings = parseFloat(this.calcNetSavings(test));
-                    if (savings <= 0) return { text: 'Keep Manual', icon: 'cancel', class: 'bg-rose-500/10 text-rose-400 border-rose-500/20' };
+                    if (savings <= 0) return { text: 'Keep Manual', icon: 'cancel', class: 'bg-rose-50 text-rose-700 border-rose-200' };
                     
                     const roi = test.devHours / savings;
-                    if (roi <= 3) return { text: 'Automate ASAP', icon: 'bolt', class: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' };
-                    if (roi <= 6) return { text: 'Viable Option', icon: 'help_outline', class: 'bg-blue-500/10 text-blue-400 border-blue-500/20' };
+                    if (roi <= 3) return { text: 'Automate ASAP', icon: 'bolt', class: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+                    if (roi <= 6) return { text: 'Viable Option', icon: 'help_outline', class: 'bg-blue-50 text-blue-700 border-blue-200' };
                     
-                    return { text: 'Low Priority', icon: 'hourglass_empty', class: 'bg-slate-800 text-slate-400 border-slate-700/60' };
+                    return { text: 'Low Priority', icon: 'hourglass_empty', class: 'bg-slate-100 text-slate-600 border-slate-200' };
                 },
                 
                 get totalSavings() {
@@ -272,11 +272,11 @@
                                 responsive: true,
                                 maintainAspectRatio: false,
                                 plugins: {
-                                    legend: { labels: { color: '#64748b', font: { family: 'Inter', size: 11, weight: 500 } } }
+                                    legend: { labels: { color: '#8a8780', font: { family: 'Inter', size: 11, weight: 500 } } }
                                 },
                                 scales: {
-                                    x: { grid: { color: '#1e293b' }, ticks: { color: '#64748b', font: { family: 'Inter', size: 10 } } },
-                                    y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b', font: { size: 10 } } }
+                                    x: { grid: { color: '#ede7dc' }, ticks: { color: '#8a8780', font: { family: 'Inter', size: 10 } } },
+                                    y: { grid: { color: '#ede7dc' }, ticks: { color: '#8a8780', font: { size: 10 } } }
                                 }
                             }
                         });
@@ -289,16 +289,16 @@
                             {
                                 label: 'Manual Baseline (Hrs/Mo)',
                                 data: this.tests.map(t => this.calcManualMonthly(t).toFixed(1)),
-                                backgroundColor: 'rgba(59, 130, 246, 0.4)',
-                                borderColor: 'rgb(59, 130, 246)',
+                                backgroundColor: 'rgba(45, 89, 178, 0.7)',
+                                borderColor: 'rgb(45, 89, 178)',
                                 borderWidth: 1.5,
                                 borderRadius: 4
                             },
                             {
                                 label: 'Maintenance Overhead (Hrs/Mo)',
                                 data: this.tests.map(t => t.maintHours),
-                                backgroundColor: 'rgba(244, 63, 94, 0.4)',
-                                borderColor: 'rgb(244, 63, 94)',
+                                backgroundColor: 'rgba(225, 196, 159, 0.7)',
+                                borderColor: 'rgb(225, 196, 159)',
                                 borderWidth: 1.5,
                                 borderRadius: 4
                             }
