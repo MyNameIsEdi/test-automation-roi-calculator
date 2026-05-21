@@ -4,9 +4,11 @@
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Chart.js](https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)
-![QA Focus](https://img.shields.io/badge/Focus-QA_%26_Automation-green?style=for-the-badge)
+![Live Demo](https://img.shields.io/badge/Live_Demo-Online-emerald?style=for-the-badge)
 
 A premium, single-file analytics workspace engineered to calculate the true Return on Investment (ROI) of test automation pipelines. Inspired by modern SaaS platforms, it seamlessly cross-references quantitative time data alongside qualitative architectural risks using native browser reactivity.
+
+> 🔗 **Production Deployment:** [Launch the Interactive Dashboard Live](https://mynameisedi.github.io/test-automation-roi-calculator/)
 
 ## Quick summary
 - **Purpose:** Empower engineering leaders and QA teams to make intelligent, data-driven automation choices while dynamically identifying brittle or subjective automation candidates.
@@ -27,13 +29,13 @@ A premium, single-file analytics workspace engineered to calculate the true Retu
 - A modern internet browser (Chrome, Edge, Safari, Firefox).
 - An active web connection to pull library components directly from verified Edge CDNs.
 
-## Run the examples
-As a zero-build, client-side static web asset, there is no localized compilation or server setup sequence needed.
+## Run Locally
+While the dashboard is fully hosted on GitHub Pages, you can also run it completely offline on your desktop.
 
-Simply clone the repository and execute the layout locally on your desktop:
+Simply clone the repository and execute the layout locally:
 
 ```bash
-git clone [https://github.com/YOUR-USERNAME/test-automation-roi-calculator.git](https://github.com/YOUR-USERNAME/test-automation-roi-calculator.git)
+git clone git@github.com:MyNameIsEdi/test-automation-roi-calculator.git
 cd test-automation-roi-calculator
 
 # Execute inside your system environment:
@@ -67,4 +69,3 @@ Resulting Calculations:
 ---
 
 License: MIT (See repository root for specific term allocations).
-
