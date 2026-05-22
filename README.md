@@ -1,122 +1,143 @@
 # Test Automation ROI Intelligence Platform
 
-This project is a full-stack Test Automation ROI (Return on Investment) dashboard designed to help engineering managers and QA leads balance engineering overhead against pipeline execution gains. It identifies brittle targets and tracks net team hours saved by automating test scenarios.
+A full-stack dashboard that helps engineering managers and QA leads make data-driven decisions about test automation. Input your test scenarios and get instant break-even timelines, risk flags, and ROI projections — no spreadsheet required.
 
-## ✨ Key Features
+## Features
 
-*   **Persistent Storage**: Save multiple scenarios and dashboards to your account using Supabase.
-*   **Auth Integration**: Secure login/signup to manage your private ROI data.
-*   **Real-time Calculations**: Instant feedback on Break-even points, Net Savings, and Risk flags.
-*   **Interactive Visuals**: Resource vector charts to visualize manual vs. automation effort.
-*   **Multi-scenario Management**: Add, remove, and categorize test cases with ease.
-*   **Professional PDF Export**: Generate comprehensive PDF reports of your dashboard.
+- **Live ROI calculations** — net monthly savings, break-even months, and recommendations update as you type
+- **Net Savings column** — per-scenario `+Xh/mo` or `-Xh/mo` displayed inline
+- **Risk flagging** — mark scenarios as Flaky (unstable) or Visual (subjective) to surface high-risk automations
+- **Recommendation engine** — `Automate` / `Viable` / `Low Priority` / `High Risk` / `Keep Manual` per scenario
+- **Duplicate row** — clone any scenario with one click
+- **CSV export** — download all scenarios with calculated fields
+- **PDF export** — generate a full-dashboard PDF report
+- **Combo chart** — bar chart of manual effort vs. maintenance cost with a net savings line overlay
+- **Recommendation mix donut** — visual breakdown of your scenario portfolio
+- **Unsaved changes indicator** — badge in the header when there are uncommitted edits
+- **Toast notifications** — non-blocking feedback for save, export, and error events
+- **Two modes** — Supabase-backed persistence for real accounts, or localStorage Demo Mode (no account needed)
 
-## 🚀 Tech Stack
+## Tech Stack
 
-*   **Framework**: Next.js 15 (App Router)
-*   **Database & Auth**: Supabase (PostgreSQL)
-*   **Styling**: Tailwind CSS
-*   **Animations**: Framer Motion
-*   **Icons**: Lucide React
-*   **Charts**: Chart.js with React-Chartjs-2
-*   **PDF Export**: jsPDF + html2canvas
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 15 (App Router, static export) |
+| Styling | Tailwind CSS + Framer Motion |
+| Database / Auth | Supabase (PostgreSQL + Row Level Security) |
+| Charts | Chart.js + react-chartjs-2 |
+| Export | jsPDF + html2canvas |
+| Icons | Lucide React |
+| Deployment | GitHub Pages |
 
-## 🛠️ Setup Instructions
+## Project Structure
 
-Follow these steps to get the project up and running locally.
+```
+├── app/
+│   ├── page.js          # Main dashboard
+│   ├── auth/page.js     # Login, signup, demo mode
+│   └── globals.css      # Tailwind + component classes
+├── components/
+│   ├── ROIChart.js      # Combo bar + line chart
+│   └── RecommendationChart.js  # Donut chart
+├── lib/
+│   ├── supabase.js      # Supabase client
+│   └── calc.js          # Pure calculation functions
+└── .github/workflows/
+    ├── deploy.yml       # Deploy to GitHub Pages on push to main
+    └── ci.yml           # Lint + build check on PRs
+```
 
-### 1. Supabase Project Setup
+## Getting Started
 
-1.  **Create a Supabase Project**:
-    *   Go to [Supabase](https://supabase.com/) and create a new project.
-    *   Note down your `Project URL` and `anon public` key from **Project Settings > API**.
+### 1. Supabase Setup (optional — skip for Demo Mode)
 
-2.  **Database Schema**:
-    *   In your Supabase project dashboard, navigate to the **SQL Editor**.
-    *   Run the following SQL script to create the `scenarios` table and enable Row Level Security (RLS):
+1. Create a project at [supabase.com](https://supabase.com) and note your **Project URL** and **anon public key** from **Project Settings → API**.
 
-    ```sql
-    -- CREATE THE SCENARIOS TABLE
-    CREATE TABLE scenarios (
-      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-      user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-      name TEXT NOT NULL,
-      manual_mins FLOAT DEFAULT 0,
-      frequency FLOAT DEFAULT 0,
-      dev_hours FLOAT DEFAULT 0,
-      maint_hours FLOAT DEFAULT 0,
-      is_flaky BOOLEAN DEFAULT false,
-      is_visual BOOLEAN DEFAULT false,
-      created_at TIMESTAMPTZ DEFAULT now()
-    );
+2. Run the following in the Supabase **SQL Editor**:
 
-    -- ENABLE ROW LEVEL SECURITY
-    ALTER TABLE scenarios ENABLE ROW LEVEL SECURITY;
+```sql
+CREATE TABLE scenarios (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  name TEXT NOT NULL,
+  manual_mins FLOAT DEFAULT 0,
+  frequency FLOAT DEFAULT 0,
+  dev_hours FLOAT DEFAULT 0,
+  maint_hours FLOAT DEFAULT 0,
+  is_flaky BOOLEAN DEFAULT false,
+  is_visual BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
 
-    -- POLICIES
-    CREATE POLICY "Users can view their own scenarios" 
-    ON scenarios FOR SELECT 
-    USING (auth.uid() = user_id);
+ALTER TABLE scenarios ENABLE ROW LEVEL SECURITY;
 
-    CREATE POLICY "Users can insert their own scenarios" 
-    ON scenarios FOR INSERT 
-    WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can view their own scenarios"    ON scenarios FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert their own scenarios"  ON scenarios FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update their own scenarios"  ON scenarios FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete their own scenarios"  ON scenarios FOR DELETE USING (auth.uid() = user_id);
+```
 
-    CREATE POLICY "Users can update their own scenarios" 
-    ON scenarios FOR UPDATE 
-    USING (auth.uid() = user_id);
-
-    CREATE POLICY "Users can delete their own scenarios" 
-    ON scenarios FOR DELETE 
-    USING (auth.uid() = user_id);
-    ```
-
-3.  **Authentication Settings**:
-    *   For local development and testing, you might want to disable email confirmation. Go to **Authentication > Providers > Email** and toggle "Confirm email" to OFF.
+3. For local development, disable email confirmation under **Authentication → Providers → Email**.
 
 ### 2. Environment Variables
 
-Create a `.env` file in the root of your project and add your Supabase credentials:
+Create a `.env` file in the project root:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_public_key
 ```
 
-Replace `your_supabase_project_url` and `your_supabase_anon_public_key` with the values you obtained from your Supabase project settings.
+For GitHub Pages deployment, add these as **repository secrets** (`Settings → Secrets → Actions`):
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-### 3. Installation
-
-Install the project dependencies:
+### 3. Install & Run
 
 ```bash
 npm install --legacy-peer-deps
-```
-*Note: `--legacy-peer-deps` is used to bypass potential peer dependency conflicts with React 19 release candidates.*
-
-### 4. Run the Development Server
-
-```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+Open [http://localhost:3000](http://localhost:3000). To skip Supabase setup entirely, click **Try Demo Mode** on the auth page.
 
-## 💡 Usage
+## Usage
 
-1.  **Sign Up / Log In**: Upon first access, you'll be redirected to the authentication page. Create an account or sign in.
-2.  **Manage Scenarios**:
-    *   Use the table to input details for each test scenario: `Manual Mins`, `Runs/Mo`, `Dev Hrs`, `Maint Hrs`.
-    *   Toggle `Flaky` or `Visual` flags to mark high-risk scenarios.
-    *   Observe real-time calculations for `Break-Even` and `Recommendation`.
-    *   Add new scenarios with the "New Scenario" button.
-    *   Remove scenarios using the trash icon.
-3.  **Monitor KPIs**: The KPI cards at the top provide an overview of `Net Monthly Savings`, `Total Upfront Hours`, `Average Break-Even`, and `Viable Targets`.
-4.  **Visualize Data**: The "Resource Vectors" chart dynamically updates to show the manual effort vs. maintenance tax for each scenario.
-5.  **Save & Export**:
-    *   Click "Save" to persist your current scenarios to your Supabase account.
-    *   Click "Export PDF" to generate a PDF report of your dashboard.
+### Scenario table
 
-## 🤝 Contributing
+| Field | Description |
+|-------|-------------|
+| **Manual Mins** | Time to run the test manually once |
+| **Runs/Mo** | How many times it runs per month |
+| **Dev Hrs** | One-time cost to automate |
+| **Maint Hrs** | Ongoing monthly maintenance |
+| **Risk flags** | Bug = flaky/unstable, Eye = visual/subjective |
 
-Feel free to fork the repository and submit pull requests. For major changes, please open an issue first to discuss what you would like to change.
+The **Net Savings** and **Break-Even** columns update live. Hover a row to reveal **Duplicate** and **Delete** actions.
+
+### Recommendation logic
+
+| Label | Condition |
+|-------|-----------|
+| `Automate` | Break-even ≤ 3 months |
+| `Viable` | Break-even ≤ 6 months |
+| `Low Priority` | Break-even > 6 months |
+| `High Risk` | Flaky or visual flag is set |
+| `Keep Manual` | Net savings ≤ 0 |
+
+### Exporting
+
+- **Save** — persists to Supabase (or localStorage in Demo Mode)
+- **CSV** — exports all scenarios with calculated fields
+- **Export PDF** — captures the full dashboard as a PDF
+
+## CI / CD
+
+| Workflow | Trigger | What it does |
+|----------|---------|-------------|
+| `deploy.yml` | Push to `main` | Builds with `--legacy-peer-deps`, injects Supabase secrets, deploys to GitHub Pages |
+| `ci.yml` | PRs to `main`, pushes to other branches | Lint + build check |
+
+## Contributing
+
+Fork the repo and open a pull request. For significant changes, open an issue first to discuss the approach.

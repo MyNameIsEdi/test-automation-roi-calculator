@@ -1,38 +1,50 @@
-# Next.js production build output
+# Next.js build output
 .next/
 out/
 
 # Dependencies
 node_modules/
 
-# Environment variables
+# Environment variables — never commit secrets
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-.env
 
-# Log files
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Package manager locks (keep only one — this project uses npm)
+yarn.lock
+pnpm-lock.yaml
+
+# Debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+*.log
 
-# Editor directories and files
+# Testing
+coverage/
+.nyc_output/
+
+# Vercel
+.vercel/
+
+# Misc
+.DS_Store
+Thumbs.db
+.thumbnails/
+*.pem
+*.tgz
+.npm/
+.cache/
+
+# Editor
 .vscode/
 .idea/
 *.sublime-project
 *.sublime-workspace
-
-# macOS
-.DS_Store
-
-# Thumbnails
-.thumbnails/
-
-# Misc
-*.log
-*.tgz
-.npm/
-.cache/
-.next/cache/
