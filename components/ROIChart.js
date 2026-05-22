@@ -3,7 +3,9 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
+  BarController,
   BarElement,
+  LineController,
   LineElement,
   PointElement,
   Title,
@@ -14,8 +16,10 @@ import { Chart } from 'react-chartjs-2';
 import { calcNetSavings, calcManualHoursPerMonth } from '@/lib/calc';
 
 ChartJS.register(
-  CategoryScale, LinearScale, BarElement,
-  LineElement, PointElement, Title, Tooltip, Legend
+  CategoryScale, LinearScale,
+  BarController, BarElement,
+  LineController, LineElement, PointElement,
+  Title, Tooltip, Legend
 );
 
 export default function ROIChart({ scenarios }) {
