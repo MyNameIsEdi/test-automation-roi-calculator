@@ -3,40 +3,80 @@
 @tailwind utilities;
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --dot-color: #dde3ec;
+  --dot-size: 1px;
+  --dot-space: 26px;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: 'Inter', sans-serif;
+  color: #0f172a;
+  background-color: #f1f5f9;
+  background-image: radial-gradient(circle, var(--dot-color) var(--dot-size), transparent var(--dot-size));
+  background-size: var(--dot-space) var(--dot-space);
+  font-family: var(--font-inter, 'Inter'), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @layer components {
   .input-field {
-    @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500;
+    @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm transition-all
+           focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500
+           placeholder:text-slate-300;
   }
 
   .btn-primary {
-    @apply bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2;
+    @apply bg-indigo-600 hover:bg-indigo-700 active:scale-[0.97] text-white px-5 py-2.5
+           rounded-xl text-sm font-semibold transition-all shadow-sm shadow-indigo-200
+           disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2;
   }
 
   .btn-secondary {
-    @apply bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 border border-slate-200 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2;
+    @apply bg-white hover:bg-slate-50 active:scale-[0.97] text-slate-700 border border-slate-200
+           px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm
+           flex items-center justify-center gap-2;
   }
 
   .card {
-    @apply bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm;
+    @apply bg-white border border-slate-200/70 rounded-2xl p-6 shadow-sm shadow-slate-100;
+  }
+
+  .card-hover {
+    @apply card hover:shadow-md hover:shadow-slate-200/80 hover:-translate-y-0.5 transition-all duration-200;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border;
+  }
+
+  .table-input {
+    @apply w-full bg-transparent border border-transparent hover:border-slate-200
+           focus:border-indigo-400 focus:bg-indigo-50/30 rounded-lg py-1.5 text-xs font-semibold
+           focus:outline-none transition-all text-center;
+  }
+
+  .table-input-name {
+    @apply w-full bg-transparent border border-transparent hover:border-slate-200
+           focus:border-indigo-400 focus:bg-indigo-50/30 rounded-lg px-2 py-1.5 text-xs font-medium
+           focus:outline-none transition-all;
   }
 }
 
-/* Hide spin buttons for number inputs */
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Hide number input spinners */
 input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-input[type=number] {
-  -moz-appearance: textfield;
+input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
