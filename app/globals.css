@@ -17,13 +17,13 @@ body {
   .input-field {
     @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500;
   }
-  
+
   .btn-primary {
-    @apply bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-md shadow-indigo-100 disabled:opacity-50 flex items-center justify-center gap-2;
+    @apply bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2;
   }
 
   .btn-secondary {
-    @apply bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2;
+    @apply bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 border border-slate-200 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2;
   }
 
   .card {
