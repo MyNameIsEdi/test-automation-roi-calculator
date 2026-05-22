@@ -27,8 +27,10 @@ jobs:
           node-version: "20"
           cache: npm
 
+      # configure-pages is required to set up the GitHub Pages environment
+      # used by upload-pages-artifact and deploy-pages. basePath is derived
+      # from GITHUB_REPOSITORY directly in next.config.js instead.
       - name: Setup Pages
-        id: pages
         uses: actions/configure-pages@v5
 
       - name: Restore build cache
@@ -45,7 +47,6 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
