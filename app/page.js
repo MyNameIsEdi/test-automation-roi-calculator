@@ -10,8 +10,6 @@ import {
 import ROIChart from '@/components/ROIChart';
 import RecommendationChart from '@/components/RecommendationChart';
 import { motion, AnimatePresence } from 'framer-motion';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import {
   calcNetSavings, calcBreakEven, getRecommendation, calcStats,
 } from '@/lib/calc';
@@ -141,6 +139,10 @@ export default function Dashboard() {
 
   const exportPDF = async () => {
     setExporting(true);
+    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+      import('html2canvas'),
+      import('jspdf'),
+    ]);
     const el = document.getElementById('dashboard-content');
     const canvas = await html2canvas(el, { scale: 2, useCORS: true });
     const imgData = canvas.toDataURL('image/png');
