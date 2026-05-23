@@ -1,6 +1,15 @@
+<div align="center">
+
 # Test Automation ROI Intelligence Platform
 
-A full-stack dashboard that helps engineering managers and QA leads make data-driven decisions about test automation. Input your test scenarios and get instant break-even timelines, risk flags, and ROI projections — no spreadsheet required.
+**A full-stack dashboard that helps engineering managers and QA leads make data-driven decisions about test automation. Input your test scenarios and get instant break-even timelines, risk flags, and ROI projections — no spreadsheet required.**
+
+🚀 **[Try the Live Demo Here](https://mynameisedi.github.io/test-automation-roi-calculator/)**
+
+
+<img src="test-automation-roi-calculator.jpeg" width="900" alt="open-qa home page" />
+
+</div>
 
 ## Features
 
